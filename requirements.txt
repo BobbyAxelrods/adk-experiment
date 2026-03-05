@@ -1,0 +1,17 @@
+fastapi
+uvicorn
+google-cloud-pubsub
+google-cloud-storage
+google-cloud-aiplatform==1.138.0
+google-adk==1.25.0
+deprecated
+google-genai
+pydantic
+python-dotenv
+twilio
+openpyxl
+pandas
+mcp
+google-generativeai
+logging
+litellm

@@ -1,0 +1,16 @@
+[
+  {
+    "id": "PROV-001",
+    "name": "Queen's Hospital (Central Outpatient)",
+    "address": "1 Queen's Road Central",
+    "phone": "9876 1111",
+    "category": "Hospital"
+  },
+  {
+    "id": "PROV-002",
+    "name": "Kowloon Skin & Laser",
+    "address": "10 Nathan Road",
+    "phone": "3123 4455",
+    "category": "Clinic"
+  }
+]

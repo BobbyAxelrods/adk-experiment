@@ -1,0 +1,16 @@
+[
+  {
+    "id": "DOC-001",
+    "name": "Dr. Lee Jason",
+    "specialty": "Cardiology",
+    "location": "Central",
+    "hospital": "Queen's Hospital"
+  },
+  {
+    "id": "DOC-002",
+    "name": "Dr. Wong Mei Ling",
+    "specialty": "Gastroenterology",
+    "location": "Tuen Mun",
+    "hospital": "Tuen Mun Ortho Centre"
+  }
+]
