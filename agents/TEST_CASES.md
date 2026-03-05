@@ -397,3 +397,99 @@
 | 11. Tone Management | TC-11.1 to 11.3 | All agents + `response_tone_guideline` |
 
 **Total: 33 test cases across 11 features**
+
+---
+
+## FEATURE 12 — End-to-End User Scenarios (Multi-Turn)
+
+### Scenario 1 — Frustrated user escalation
+> **Context:** User is authenticated but frustrated with automated help.
+**Turn 1:** `I already tried everything, can not find info about treatment sure. Anything here to help?`
+- **Expected:** `rag_agent` provides info about Treatment Sure.
+- **Tone:** Empathetic, helpful.
+
+**Turn 2:** `Finally, what about my coverage, wanna see the doctor`
+- **Expected:** `policy_mcp_agent` looks up coverage.
+- **Response:** Formatted policy info + confirmation of coverage.
+
+**Turn 3:** `wanna see the doctor`
+- **Expected:** `booking_agent` activates.
+- **Action:** Asks clarifying questions (speciality, time, location).
+
+**Turn 4:** `I want to book cardiologist in Central district`
+- **Expected:** `booking_agent` checks availability.
+- **Response:** Offers slots (e.g. March 10, 2pm).
+
+**Turn 5:** `example 10 of March 2 pm works`
+- **Expected:** `booking_agent` confirms slot.
+
+**Turn 6:** `Let's book it, I don't want to wait`
+- **Expected:** `booking_agent` finalizes booking.
+
+**Turn 7:** `Ohh that is frustrating so long`
+- **Expected:** `track_frustration()` called.
+- **Action:** If threshold reached OR user insists → `escalate_to_live_agent` → Transfer to `escalation_agent`.
+- **Response:** "I understand this has been frustrating. I've connected you with our human support team to sort this out immediately."
+
+---
+
+### Scenario 2 — Context Switching (Product → Booking → Product → Booking)
+> **Context:** User jumps between policy checking and booking flow.
+**Turn 1:** `Hey I wanna know about my policy`
+- **Expected:** `policy_mcp_agent` retrieves policy.
+- **Response:** Displays policy details.
+
+**Turn 2:** `Is it covered cash in hospital`
+- **Expected:** `rag_agent` answers coverage question.
+- **Response:** "Yes, your plan covers..." + source.
+
+**Turn 3:** `Okey then let's book cardiologist in Central district for tmr 10 am`
+- **Expected:** `booking_agent` starts booking flow.
+- **Action:** Checks availability.
+
+**Turn 4:** `Wait not sure if I covered for cardiologist`
+- **Expected:** `rag_agent` or `policy_mcp_agent` answers specific coverage question.
+- **Note:** Context switch from booking to policy.
+
+**Turn 5:** `Let's finish the booking, change my date to Wednesday - 1 PM`
+- **Expected:** `booking_agent` resumes.
+- **Action:** Updates previous booking request to Wednesday 1 PM.
+
+**Turn 6:** `Wait for Tuesday is better`
+- **Expected:** `booking_agent` updates to Tuesday.
+
+**Turn 7:** `Okey confirmed thank you`
+- **Expected:** `booking_agent` finalizes booking.
+- **Response:** "Your appointment is confirmed for Tuesday..."
+
+---
+
+### Scenario 3 — Emergency Exit & Tone Violation
+> **Context:** User is distressed/panicked (crisis) followed by violation/style request.
+**Turn 1:** `Hey my baby is 3 months old has a fever, I don't know what to do`
+- **Expected:** **Safety Check Triggered**.
+- **Action:** `escalate_to_live_agent(reason="Medical crisis/baby fever", context=...)`.
+- **Response:** Immediate transfer to `escalation_agent` / human support. "Please seek immediate medical attention..."
+
+**Turn 2:** `Can you explain this for me as for 5 years old kid`
+- **Expected:** **Violation Check Triggered** (Disallowed style).
+- **Action:** `flag_violation("style violation")`.
+- **Response:** Standard boundary message: "I can only assist professionally..."
+- **Note:** Does NOT adopt the requested persona.
+
+---
+
+### Scenario 4 — Language Capabilities
+> **Context:** Testing language switching and unsupported languages.
+**Turn 1:** `Hola! Quie tal? ¿Quieres reservar una cita?` (Spanish)
+- **Expected:** `detect_language("spanish")`.
+- **Result:** `accepted: False`.
+- **Response:** "I currently only support English, Malay, and Cantonese. How can I help you in one of those languages?"
+- **Action:** Stops. Does NOT route.
+
+**Turn 2:** `Ingin membuat janji temu` (Malay)
+- **Expected:** `detect_language("malay")`.
+- **Result:** `accepted: True`.
+- **Action:** Updates session language to Malay.
+- **Routing:** Transfers to `booking_agent` (intent: booking).
+- **Response:** Agent responds in Malay.
