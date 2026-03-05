@@ -1,0 +1,95 @@
+# ============================================================
+# PRU Health — .gitignore
+# Keep: agents/, tools/, tone_group/, utils/, config/
+# Hide: secrets, PII, caches, venv, IDE, OS files
+# ============================================================
+
+# ── Secrets & API Tokens ────────────────────────────────────
+.env
+.env.*
+*.env
+secrets/
+credentials/
+service_account*.json
+*_credentials.json
+*_key.json
+gcp_key*.json
+google_credentials*.json
+token*.json
+auth*.json
+*.pem
+*.p12
+*.pfx
+
+# ── PII / Mock Data with real-looking user data ─────────────
+tools/mcp_mock_data/customers.json
+tools/mcp_mock_data/appointments.json
+tools/mcp_mock_data/policies.json
+tools/mcp_policy/mock_policy_data.json
+
+# ── Sample / reference data (not part of codebase) ──────────
+sample_data.txt.md
+mock.json
+
+# ── Python cache ─────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+
+# ── Virtual environment ──────────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ── Distribution / build ─────────────────────────────────────
+dist/
+build/
+*.egg-info/
+*.egg
+wheels/
+
+# ── Logs ─────────────────────────────────────────────────────
+*.log
+logs/
+
+# ── IDE ───────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.trae/
+
+# ── OS ────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ── Google Cloud / GCP ───────────────────────────────────────
+.gcloud/
+application_default_credentials.json
+
+# ── Docker ───────────────────────────────────────────────────
+.dockerignore
+
+# ── Test artifacts ───────────────────────────────────────────
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+
+# ── Deployment scripts (contain project IDs / registry URLs) ─
+deploy.sh
+Dockerfile
+approval.py
+init_topic.py
+inspect_pubsub.py
+
+# ── Pubsub / infra ────────────────────────────────────────────
+pubsub/
+controllers/
