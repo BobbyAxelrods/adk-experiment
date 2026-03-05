@@ -146,7 +146,6 @@ def leave_message(tool_context: ToolContext, message: str) -> Dict[str, Any]:
     }
 
 # ADK Tool Definitions
-# escalate_to_human is REMOVED as per instruction to use sub-agent
 # escalate_to_live_agent is kept as a tool for the escalation agent to use (to generate ticket)
 escalate_to_live_agent = FunctionTool(func=escalate_to_live_agent)
 check_agent_availability = FunctionTool(func=check_agent_availability)

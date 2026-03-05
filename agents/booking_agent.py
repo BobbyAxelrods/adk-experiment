@@ -1,8 +1,8 @@
 import os
 from google.adk.agents import Agent
 from google.adk.models.lite_llm import LiteLlm
-from tools.policy_tools.policy_tools import flag_violation, report_violation_to_root, track_frustration
-from tools.mcp_escalation.escalation_tools import escalate_to_human
+from tools.policy_tools.policy_tools import flag_violation, report_violation_to_root, track_frustration, record_unrecognized_intent
+from tools.mcp_escalation.escalation_tools import escalate_to_live_agent
 from tools.tone_management.tone_guideline_tools import response_tone_guideline
 from tools.booking.appointment_booking import create_booking_tools
 from tools.mcp_policy.mcp_tools import policy_mcp_tool, booking_mcp_tool
@@ -23,8 +23,9 @@ tools.append(policy_mcp_tool)
 tools.append(response_tone_guideline)
 tools.append(flag_violation)
 tools.append(report_violation_to_root)
-tools.append(escalate_to_human)
+tools.append(escalate_to_live_agent)
 tools.append(track_frustration)
+tools.append(record_unrecognized_intent)
 
 booking_agent = Agent(
     model=litellm_model,

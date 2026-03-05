@@ -4,6 +4,8 @@ from google.adk.tools import AgentTool
 from google.adk.models.lite_llm import LiteLlm
 from tools.corpus.corpus_tools import query_corpus  
 from tools.tone_management.tone_guideline_tools import response_tone_guideline
+from tools.policy_tools.policy_tools import flag_violation, report_violation_to_root, track_frustration, record_unrecognized_intent
+from tools.mcp_escalation.escalation_tools import escalate_to_live_agent
 from tools.mcp_policy.mcp_tools import policy_mcp_tool
 from .callback import reset_unrecognized_intent, count_unrecognized_intents
 from .policy_mcp_agent import policy_mcp_agent
@@ -27,7 +29,12 @@ rag_agent = Agent(
     tools=[
         query_corpus,
         response_tone_guideline,
-        AgentTool(policy_mcp_agent)
+        AgentTool(policy_mcp_agent),
+        flag_violation,
+        report_violation_to_root,
+        track_frustration,
+        record_unrecognized_intent,
+        escalate_to_live_agent
     ],
     before_agent_callback=reset_unrecognized_intent,
     after_model_callback=[count_unrecognized_intents]

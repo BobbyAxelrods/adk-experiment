@@ -13,6 +13,8 @@ from google.adk.tools.tool_context import ToolContext
 from google.adk.tools.base_tool import BaseTool
 from google.genai import types
 from .callback import reset_unrecognized_intent, count_unrecognized_intents
+from tools.policy_tools.policy_tools import flag_violation, report_violation_to_root, track_frustration, record_unrecognized_intent
+from tools.mcp_escalation.escalation_tools import escalate_to_live_agent
 
 
 load_dotenv()
@@ -130,7 +132,14 @@ policy_mcp_agent = Agent(
     model=litellm_model,
     description="Agent with ability to call policy mcp tool when user ask their own policy or product",
     instruction=policy_mcp_prompt,
-    tools=[policy_mcp_tool],
+    tools=[
+        policy_mcp_tool,
+        flag_violation,
+        report_violation_to_root,
+        track_frustration,
+        record_unrecognized_intent,
+        escalate_to_live_agent
+    ],
     after_tool_callback=after_tool_update_state_user_policy,
     before_agent_callback=check_user_authentication,
     after_model_callback=count_unrecognized_intents,

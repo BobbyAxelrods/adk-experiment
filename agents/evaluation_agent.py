@@ -5,6 +5,9 @@ from tools.corpus.corpus_tools import query_corpus
 from tools.tone_management.tone_guideline_tools import response_tone_guideline
 from tools.mcp_policy.mcp_tools import policy_mcp_tool
 from tools.lifecycle.lifecycle_main import automated_evaluation_testcase
+from tools.policy_tools.policy_tools import flag_violation, report_violation_to_root, track_frustration, record_unrecognized_intent
+from tools.mcp_escalation.escalation_tools import escalate_to_live_agent
+from .callback import reset_unrecognized_intent, count_unrecognized_intents
 
 
 def load_instructions(file_name):
@@ -21,5 +24,14 @@ evaluation_agent = Agent(
     model=litellm_model,
     description="Evaluate the performance of RAG agent for Prudential insurance policy/products inquiries",
     instruction=load_instructions("evaluation_agent_instruction"),
-    tools=[automated_evaluation_testcase],
+    tools=[
+        automated_evaluation_testcase,
+        flag_violation,
+        report_violation_to_root,
+        track_frustration,
+        record_unrecognized_intent,
+        escalate_to_live_agent
+    ],
+    before_agent_callback=reset_unrecognized_intent,
+    after_model_callback=count_unrecognized_intents,
 )

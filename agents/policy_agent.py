@@ -3,7 +3,9 @@ from google.adk.agents import Agent
 from google.adk.models.lite_llm import LiteLlm
 from tools.corpus.corpus_tools import query_corpus
 from tools.tone_management.tone_guideline_tools import response_tone_guideline
-from tools.mcp_policy.mcp_tools import policy_mcp_tool
+from tools.policy_tools.policy_tools import flag_violation, report_violation_to_root, track_frustration, record_unrecognized_intent
+from tools.mcp_escalation.escalation_tools import escalate_to_live_agent
+from .callback import reset_unrecognized_intent, count_unrecognized_intents
 
 
 def load_instructions(file_name):
@@ -20,5 +22,16 @@ policy_agent = Agent(
     model=litellm_model,
     description="Factual knowledge agent for Prudential insurance policy/products inquiries",
     instruction=load_instructions("policy_agent_instruction"),
-    tools=[query_corpus, response_tone_guideline, policy_mcp_tool],
+    tools=[
+        query_corpus,
+        response_tone_guideline,
+        policy_mcp_tool,
+        flag_violation,
+        report_violation_to_root,
+        track_frustration,
+        record_unrecognized_intent,
+        escalate_to_live_agent
+    ],
+    before_agent_callback=reset_unrecognized_intent,
+    after_model_callback=count_unrecognized_intents,
 )
