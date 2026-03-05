@@ -30,6 +30,7 @@ tools/mcp_policy/mock_policy_data.json
 # ── Sample / reference data (not part of codebase) ──────────
 sample_data.txt.md
 mock.json
+codebase.txt
 
 # ── Python cache ─────────────────────────────────────────────
 __pycache__/
@@ -73,6 +74,13 @@ desktop.ini
 # ── Google Cloud / GCP ───────────────────────────────────────
 .gcloud/
 application_default_credentials.json
+
+# ── Twilio ────────────────────────────────────────────────────
+twilio*.json
+twilio*.env
+*twilio*key*
+*twilio*token*
+*twilio*secret*
 
 # ── Docker ───────────────────────────────────────────────────
 .dockerignore
