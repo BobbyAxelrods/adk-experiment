@@ -8,6 +8,9 @@
 .env
 .env.*
 *.env
+.env.local
+.env.production
+.env.staging
 secrets/
 credentials/
 service_account*.json
@@ -20,6 +23,11 @@ auth*.json
 *.pem
 *.p12
 *.pfx
+*.key
+openai*.json
+azure*.json
+*secret*
+*api_key*
 
 # ── PII / Mock Data with real-looking user data ─────────────
 tools/mcp_mock_data/customers.json
@@ -31,6 +39,8 @@ tools/mcp_policy/mock_policy_data.json
 sample_data.txt.md
 mock.json
 codebase.txt
+llm-full.txt
+data/
 
 # ── Python cache ─────────────────────────────────────────────
 __pycache__/
@@ -38,6 +48,10 @@ __pycache__/
 *.pyo
 *.pyd
 .Python
+.mypy_cache/
+.ruff_cache/
+.cache/
+*.pyc
 
 # ── Virtual environment ──────────────────────────────────────
 .venv/
@@ -97,6 +111,11 @@ Dockerfile
 approval.py
 init_topic.py
 inspect_pubsub.py
+inspect_adk_tools.py
+publish_message.py
+start_local_mcp_server.py
+simulation_test.py
+scripts/
 
 # ── Pubsub / infra ────────────────────────────────────────────
 pubsub/

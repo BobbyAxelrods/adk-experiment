@@ -10,7 +10,7 @@ from .policy_agent import policy_agent
 from .policy_mcp_agent import policy_mcp_agent
 from .vas_agent import vas_agent
 from .evaluation_agent import evaluation_agent
-from .callback import count_unrecognized_intents, reset_unrecognized_intent
+from .callback import count_unrecognized_intents
 
 from tools.policy_tools.policy_tools import update_summary, track_frustration, detect_language, flag_violation, record_unrecognized_intent
 from tools.tone_management.tone_guideline_tools import response_tone_guideline
@@ -36,7 +36,7 @@ INITIAL_STATE = {
     "escalation_recommended": False,
     "user_id": USER_ID,
     "language": "english",
-    "user_authenticated": False,
+    "authentication": False,
 }
 
 model_name = os.getenv("MODEL_NAME", "gpt-4o")
