@@ -9,6 +9,7 @@ from typing import Dict, List, Any, Optional
 from tools.mcp_policy.mcp_tools import policy_mcp_tool
 from agents.policy_mcp_prompt import policy_mcp_prompt
 from google.adk.agents.callback_context import CallbackContext
+from google.adk.models import LlmRequest, LlmResponse
 from google.adk.tools.tool_context import ToolContext
 from google.adk.tools.base_tool import BaseTool
 from google.genai import types
@@ -109,22 +110,41 @@ def after_tool_update_state_user_policy(
         return None
 
 
-def check_user_authentication(callback_context: CallbackContext) -> Optional[types.Content]:
-    agent_name = callback_context.agent_name
-    invocation_id = callback_context.invocation_id
-    current_state = callback_context.state.to_dict()
-    print(f"\n[Callback] Entering agent: {agent_name} (Inv: {invocation_id})")
-    print(f"[Callback] Current State: {current_state}")
-
-    if current_state.get('authentication'):
-        print(f"[Callback] State condition not met: Proceeding with agent {agent_name}.")
-        return None
+def _require_authentication_before_policy_lookup(
+    callback_context: CallbackContext,
+    llm_request: Optional[LlmRequest] = None,
+    **kwargs: Any,
+) -> Optional[LlmResponse]:
+    state_obj = callback_context.state
+    state: Dict[str, Any]
+    if hasattr(state_obj, "to_dict"):
+        state = state_obj.to_dict()
     else:
-        print(f"[Callback] State condition 'skip_llm_agent=True' met: Skipping agent {agent_name}.")
-        return types.Content(
-            parts=[types.Part(text=f"Please authenticate first.")],
-            role="model"
-        )
+        state = state_obj  # type: ignore[assignment]
+
+    auth_value = state.get("authentication")
+    is_authenticated = False
+    
+    if isinstance(auth_value, bool):
+        is_authenticated = auth_value
+    elif isinstance(auth_value, str):
+        is_authenticated = auth_value.lower() == "true"
+    
+    print(f"[Callback] Checking auth in {callback_context.agent_name}. Value: {auth_value} (Type: {type(auth_value)}), Is Authenticated: {is_authenticated}")
+
+    if is_authenticated:
+        # If user is authenticated, explicitly set required flag to False
+        # This signals the prompt gate that it's safe to proceed
+        callback_context.state["authentication_required"] = False
+        return None
+
+    try:
+        callback_context.state["authentication_required"] = True
+        # callback_context.state["authentication_required_agent"] = callback_context.agent_name
+    except Exception:
+        pass
+
+    return None
 
 
 policy_mcp_agent = Agent(
@@ -141,6 +161,7 @@ policy_mcp_agent = Agent(
         escalate_to_live_agent
     ],
     after_tool_callback=after_tool_update_state_user_policy,
-    before_agent_callback=check_user_authentication,
+    before_model_callback=_require_authentication_before_policy_lookup,
+    before_agent_callback=reset_unrecognized_intent,
     after_model_callback=count_unrecognized_intents,
 )
