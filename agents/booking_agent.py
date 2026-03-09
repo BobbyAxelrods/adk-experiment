@@ -9,10 +9,7 @@ from tools.mcp_policy.mcp_tools import policy_mcp_tool, booking_mcp_tool
 from .callback import reset_unrecognized_intent, count_unrecognized_intents
 
 
-def load_instructions(file_name):
-    path = os.path.join(os.path.dirname(__file__), f"{file_name}.md")
-    with open(path, "r", encoding="utf-8") as f:
-        return f.read()
+from ._fragments.loader import load_instruction
 
 model_name = os.getenv("MODEL_NAME", "gpt-4o")
 litellm_model = LiteLlm(model=model_name)
@@ -31,7 +28,7 @@ booking_agent = Agent(
     model=litellm_model,
     name='booking_agent',
     description="Worker for booking appointments",
-    instruction=load_instructions("booking_agent_instruction"),
+    instruction=load_instruction("booking_agent"),
     tools=tools,
     after_model_callback=count_unrecognized_intents,
     before_agent_callback=reset_unrecognized_intent

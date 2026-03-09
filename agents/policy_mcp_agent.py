@@ -7,7 +7,7 @@ import json
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 from typing import Dict, List, Any, Optional
 from tools.mcp_policy.mcp_tools import policy_mcp_tool
-from agents.policy_mcp_prompt import policy_mcp_prompt
+from agents._fragments.loader import load_instruction
 from google.adk.agents.callback_context import CallbackContext
 from google.adk.models import LlmRequest, LlmResponse
 from google.adk.tools.tool_context import ToolContext
@@ -151,7 +151,7 @@ policy_mcp_agent = Agent(
     name="policy_mcp_agent",
     model=litellm_model,
     description="Agent with ability to call policy mcp tool when user ask their own policy or product",
-    instruction=policy_mcp_prompt,
+    instruction=load_instruction("policy_mcp_agent"),
     tools=[
         policy_mcp_tool,
         flag_violation,

@@ -11,10 +11,7 @@ from .callback import reset_unrecognized_intent, count_unrecognized_intents
 from .policy_mcp_agent import policy_mcp_agent
 
 
-def load_instructions(file_name):
-    path = os.path.join(os.path.dirname(__file__), f"{file_name}.md")
-    with open(path, "r", encoding="utf-8") as f:
-        return f.read()
+from ._fragments.loader import load_instruction
 
 
 model_name = os.getenv("MODEL_NAME", "gpt-4o")
@@ -25,7 +22,7 @@ rag_agent = Agent(
     name="rag_agent",
     model=litellm_model,
     description="Factual knowledge agent for Prudential insurance,policy/products and health inquiries",
-    instruction=load_instructions("rag_agent_instruction"),
+    instruction=load_instruction("rag_agent"),
     tools=[
         query_corpus,
         response_tone_guideline,

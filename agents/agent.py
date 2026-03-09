@@ -15,15 +15,7 @@ from .callback import count_unrecognized_intents
 from tools.policy_tools.policy_tools import update_summary, track_frustration, detect_language, flag_violation, record_unrecognized_intent
 from tools.tone_management.tone_guideline_tools import response_tone_guideline
 from tools.mcp_escalation.escalation_tools import escalate_to_live_agent
-
-
-def load_instructions(instruction_file_name):
-    path_of_instructions = os.path.join(os.path.dirname(__file__), f"{instruction_file_name}.md")
-    try:
-        with open(path_of_instructions, "r", encoding="utf-8") as f:
-            return f.read()
-    except Exception:
-        return "Error reading instruction file"
+from ._fragments.loader import load_instruction
 
 
 USER_ID = "member_default"
@@ -46,7 +38,7 @@ root_agent = Agent(
     name="pru_master_orchestrator",
     model=litellm_model,
     description="master orchestrator for Prudential multi-agent workflow",
-    instruction=load_instructions("instruction"),
+    instruction=load_instruction("root_agent"),
     tools=[
         track_frustration,
         detect_language,
