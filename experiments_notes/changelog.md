@@ -200,6 +200,323 @@ import from `tools.mcp_escalation.escalation_tools`.
 
 ---
 
+---
+
+## Coding Logic — How Each Change Was Implemented
+
+This section explains the actual code pattern used for each change so you can replicate or extend the same pattern elsewhere.
+
+---
+
+### Pattern 1 — Fragment Loader (`agents/_fragments/loader.py`)
+
+**The problem it solves:** Agent instructions were long strings hardcoded in each agent file or loaded from separate `.md` files with no reuse. Shared content (identity, language rules, session context) was copy-pasted into every instruction — any edit needed to be made in 7+ places.
+
+**How it works:**
+
+```
+Step 1 — At import time, glob all *.md files in _fragments/ into a dict
+         { "shared_identity": "...", "root_agent": "...", etc. }
+
+Step 2 — Define a regex: \{\{\s*(\w+)\s*\}\}
+         This matches {{ token_name }} inside any template string
+
+Step 3 — For each agent name in the list, find its .md file,
+         run _resolve() on it which replaces every {{ token }} with the
+         matching file's content from the dict
+
+Step 4 — Store the fully resolved strings in _INSTRUCTION_CACHE
+
+Step 5 — load_instruction("root_agent") just does a dict lookup —
+         zero disk I/O at call time
+```
+
+**Key code pattern:**
+```python
+# glob into dict at import time
+_FILE_CACHE = {
+    path.stem: path.read_text(encoding="utf-8")
+    for path in _FRAGMENTS_DIR.glob("*.md")
+}
+
+# regex replace {{ token }} with file contents
+_TOKEN_RE = re.compile(r"\{\{\s*(\w+)\s*\}\}")
+
+def _resolve(template: str) -> str:
+    def replacer(match):
+        name = match.group(1).strip()
+        return _FILE_CACHE[name]      # KeyError if token not found = safe failure
+    return _TOKEN_RE.sub(replacer, template)
+
+# resolve once at import, cache forever
+_INSTRUCTION_CACHE[name] = _resolve(_FILE_CACHE[name])
+```
+
+**To add a new shared fragment:** create `agents/_fragments/my_fragment.md`, then reference it anywhere as `{{ my_fragment }}` in any agent `.md` file. No Python changes needed.
+
+---
+
+### Pattern 2 — Session Context Injection (`agents/_fragments/shared_session_context.md`)
+
+**The problem it solves:** Agents were told "check state for user_id" but ADK doesn't let the LLM read raw state — so the LLM was guessing from conversation history. The LLM had no reliable way to know if the user was authenticated, frustrated, or had pending intents.
+
+**How it works:**
+
+ADK supports `{key?}` template syntax inside instruction strings. Before each turn, ADK substitutes every `{key?}` with the current value from `session.state`. The `?` means "render empty string if key is missing" — it never crashes.
+
+```markdown
+## SESSION CONTEXT
+- Language: {language?}
+- User ID: {user_id?}
+- Authenticated: {authentication?}
+- Frustration count: {frustration_count?}
+- Escalation recommended: {escalation_recommended?}
+```
+
+**This file is then pulled into every agent instruction via `{{ shared_session_context }}`.**
+
+The result: every agent's system prompt, at the start of every turn, contains the actual live values. The LLM reads them like normal text — no tool call needed to find out if the user is authenticated.
+
+**The `?` suffix is critical** — without it, a missing key raises an error. Always use `{key?}` not `{key}` for optional state values.
+
+---
+
+### Pattern 3 — `temp:` Key Auto-Expiry (`tools/policy_tools/policy_tools.py` — `track_frustration`)
+
+**The problem it solves:** `track_frustration` was writing a `turn_detection` key to track whether it had already been called this turn (to avoid double-counting). But regular state keys persist across turns — so a manual reset callback was needed after every turn to clean it up.
+
+**How it works:**
+
+ADK has a built-in convention: any state key prefixed with `temp:` is automatically deleted at the end of the turn. No callback, no cleanup code needed.
+
+```python
+# Before (persists across turns, needs manual reset):
+tool_context.state["turn_detection"] = "frustration"
+
+# After (auto-deleted after the turn ends):
+tool_context.state["temp:turn_detection"] = "frustration"
+```
+
+**Rule of thumb:** use `temp:` for any key that is only meaningful for the current turn (e.g. "did I already call this tool this turn?"). Use a plain key for anything that must survive across turns (counters, flags, user data).
+
+---
+
+### Pattern 4 — `FunctionTool` Registration Pattern (`tools/policy_tools/policy_tools.py`)
+
+**The problem it solves:** ADK requires tools to be `FunctionTool` objects, not raw Python functions, to be passed to `Agent(tools=[...])`. Without this, ADK either ignores them or errors.
+
+**How it works:**
+
+Define the function with `tool_context: ToolContext` as a parameter (ADK injects this automatically), then wrap it:
+
+```python
+# 1. Define the function — ToolContext is injected by ADK, not called manually
+def track_frustration(tool_context: ToolContext) -> dict:
+    count = tool_context.state.get("frustration_count", 0) + 1
+    tool_context.state["frustration_count"] = count
+    return {"frustration_count": count}
+
+# 2. Wrap as FunctionTool at module level (bottom of file)
+track_frustration = FunctionTool(func=track_frustration)
+
+# 3. Import and pass to Agent
+from tools.policy_tools.policy_tools import track_frustration
+root_agent = Agent(tools=[track_frustration, ...])
+```
+
+**Why re-assign the same name:** `track_frustration = FunctionTool(func=track_frustration)` shadows the function with the tool object. This means any file that does `from tools.policy_tools.policy_tools import track_frustration` gets the `FunctionTool`, not the raw function. Consistent and safe.
+
+---
+
+### Pattern 5 — `after_model_callback` for Passive Counting (`agents/callback.py`)
+
+**The problem it solves:** Counting unrecognized intents inside the tool itself would require the LLM to call the tool correctly every time. Putting the counter logic in a callback means it runs automatically after every model response — the LLM only needs to signal intent, not manage the counter.
+
+**How it works:**
+
+```
+after_model_callback fires after every LLM response, before the response is returned.
+It receives: callback_context (has .state), llm_response (has .content.parts)
+
+Logic:
+  1. Scan llm_response.content.parts for function_call objects
+  2. If the LLM called record_unrecognized_intent → increment counter
+  3. If the LLM called any other "real" tool → reset counter (genuine success)
+  4. If counter >= 3 → set escalation_recommended = True, reset counter
+  5. Always return llm_response unchanged (never block the response)
+```
+
+```python
+def count_unrecognized_intents(callback_context, llm_response):
+    for part in llm_response.content.parts:
+        func_call = getattr(part, "function_call", None)
+        if func_call:
+            name = getattr(func_call, "name", "")
+            if name == "record_unrecognized_intent":
+                called_record_unrecognized = True
+            elif name not in disallowed_reset_tools:
+                saw_success_tool = True    # real tool = genuine success = reset
+
+    if called_record_unrecognized:
+        state["unrecognized_intent_count"] += 1
+        if count >= 3:
+            state["escalation_recommended"] = True
+    elif saw_success_tool:
+        state["unrecognized_intent_count"] = 0
+
+    return llm_response    # must return — returning None would swallow the response
+```
+
+**`disallowed_reset_tools`** is the set of signal/routing tools that don't count as genuine success (e.g. `detect_language`, `flag_violation`). Without this list, calling any tool would reset the counter even if the LLM was still confused.
+
+---
+
+### Pattern 6 — INITIAL_STATE as the Single Source of Truth (`agents/agent.py`)
+
+**The problem it solves:** Tools were writing state keys like `violation_count`, `escalation_history`, `last_escalation_ticket` on first use — but those keys never existed in initial state. This means on the very first read (e.g. `state.get("violation_count", 0)`), the default was used, but it was never formally declared anywhere. This caused subtle bugs where state checks worked sometimes but not others.
+
+**How it works:**
+
+```python
+INITIAL_STATE = {
+    # User context
+    "user_id":                   USER_ID,
+    "language":                  "english",
+    "authentication":            False,
+
+    # Counters — all start at 0
+    "frustration_count":         0,
+    "violation_count":           0,
+    "unrecognized_intent_count": 0,
+
+    # Escalation — all start at False/None/[]
+    "escalation_recommended":    False,
+    "escalated_to_human":        False,
+    "last_escalation_ticket":    None,
+    "escalation_history":        [],
+
+    # Multi-intent queue
+    "pending_intents":           [],
+    "current_intent":            None,
+}
+```
+
+**Rule:** every key that any tool or callback reads or writes should be declared here with its zero/empty/default value. If a tool writes to a key that isn't in `INITIAL_STATE`, add it. This makes state predictable from turn 0.
+
+**`output_key="root_agent_output"`** on the `root_agent` replaces the old `update_summary` tool — ADK automatically writes the agent's final text response to `session.state["root_agent_output"]` after every turn. No tool needed, no state key to declare.
+
+---
+
+### Pattern 7 — Multi-Intent Queue (`set_pending_intents` + `advance_intent`)
+
+**The problem it solves:** When a user sends a message with two intents (e.g. "what does my policy cover AND book me an appointment"), the root agent would only handle one. The other was lost.
+
+**How it works — two tools, one queue in state:**
+
+```
+Turn start:
+  LLM detects multiple intents → calls set_pending_intents(["policy_query", "booking"])
+  State: pending_intents=["policy_query", "booking"], current_intent="policy_query"
+
+Root agent routes to rag_agent for policy_query.
+rag_agent returns.
+
+Root agent calls advance_intent():
+  State: pending_intents=["booking"], current_intent="booking"
+  Returns: {next_intent: "booking", remaining: 1, done: False}
+
+Root agent routes to booking_agent.
+booking_agent returns.
+
+Root agent calls advance_intent():
+  State: pending_intents=[], current_intent=None
+  Returns: {next_intent: None, remaining: 0, done: True}
+
+done=True → give consolidated closing response.
+```
+
+```python
+def set_pending_intents(tool_context, intents: list):
+    tool_context.state["pending_intents"] = intents
+    tool_context.state["current_intent"]  = intents[0] if intents else None
+
+def advance_intent(tool_context):
+    pending = tool_context.state.get("pending_intents", [])
+    pending.pop(0)                        # remove completed intent
+    next_intent = pending[0] if pending else None
+    tool_context.state["pending_intents"] = pending
+    tool_context.state["current_intent"]  = next_intent
+    return {"next_intent": next_intent, "done": next_intent is None}
+```
+
+The queue is a plain list in state — `pop(0)` removes the head, the next item becomes `current_intent`. The LLM reads `current_intent` from SESSION CONTEXT to know what to route next.
+
+---
+
+### Pattern 8 — `escalation_recommended` as a Shared Stop Signal
+
+**The problem it solves:** Multiple tools could trigger escalation (`track_frustration`, `flag_violation`, `escalate_to_live_agent`) but only some of them were setting `escalation_recommended = True`. Sub-agents had no reliable way to know they should stop routing and escalate.
+
+**How it works — every escalation path sets the same key:**
+
+```python
+# track_frustration — sets it at threshold 3
+if count >= FRUSTRATION_THRESHOLD:
+    tool_context.state["escalation_recommended"] = True
+
+# flag_violation — sets it at 3 violations
+if count >= 3:
+    tool_context.state["escalation_recommended"] = True
+
+# escalate_to_live_agent — sets it immediately, always
+state["escalation_recommended"] = True
+
+# count_unrecognized_intents callback — sets it at 3 unrecognized
+if current >= 3:
+    state["escalation_recommended"] = True
+```
+
+Every agent instruction starts with `{{ shared_session_context }}` which injects the current value. Step 1 of every agent is: "if `escalation_recommended` is True → stop, go to escalation step immediately."
+
+This means the stop signal is always visible to every agent, set by every trigger path, and the LLM sees it in plain text at the start of its system prompt — not buried in a tool response.
+
+---
+
+## Git Integration — Merge `origin/main` into `major` (2026-03-11)
+
+### What Changed
+
+Merged `origin/main` (unrelated history, single "initial" commit from 2026-03-05) into the `major` branch using the `ours` merge strategy.
+
+### Why
+
+The `major` branch and `origin/main` had no common ancestor — they were pushed from separate git lineages. Without this merge, git would refuse to track the two histories as related. The merge formally unifies them into one lineage so future pulls/pushes against `origin/main` work cleanly.
+
+### Strategy: `ours`
+
+The `ours` strategy was used deliberately:
+
+- **All code on `major` is preserved exactly** — no files were overwritten or reverted
+- `origin/main` contributed nothing to the working tree; only the commit graph was updated
+- Old files that existed only on `origin/main` (e.g. `agents/instruction.md`, `agents/*_instruction.md`, `agents/.adk/session.db`, `tools/escalation_tools/escalation_tools.py`) were **not** restored — they are correctly superseded by the `_fragments/` system and `tools/mcp_escalation/`
+
+### What Was NOT Merged (Intentionally)
+
+| File | Reason skipped |
+|---|---|
+| `agents/instruction.md` | Replaced by `agents/_fragments/` system |
+| `agents/*_instruction.md` (6 files) | Replaced by per-agent fragment `.md` files |
+| `agents/.adk/session.db` | Runtime artifact, not source code |
+| `tools/escalation_tools/escalation_tools.py` | Duplicate — consolidated into `tools/mcp_escalation/escalation_tools.py` |
+
+### Result
+
+- `major` is now **2 commits ahead of `origin/major`** and ready to push
+- Git history is unified — `origin/main` is a reachable ancestor of `major`
+- No code regressions; all current architecture (LiteLLM, `_fragments`, multi-intent tools, safety tools) is intact
+
+---
+
 ## What the LLM Can Now See (vs Before)
 
 | State value | Before | After |
