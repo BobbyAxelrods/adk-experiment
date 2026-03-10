@@ -8,9 +8,12 @@ def count_unrecognized_intents(
     llm_response: LlmResponse,
 ) -> Optional[LlmResponse]:
     """
-    after_model_callback — passive counter.
-    Only increments when the agent explicitly calls `record_unrecognized_intent`.
-    No forced LlmResponse override (Bug 1 fix).
+    after_model_callback — passive counter for unrecognized intents.
+
+    Sole authority for incrementing unrecognized_intent_count.
+    Only increments when the agent explicitly calls record_unrecognized_intent.
+    Resets the count when a genuine success tool is called instead.
+    Never overrides the LlmResponse.
     """
     state = callback_context.state
 
@@ -22,13 +25,13 @@ def count_unrecognized_intents(
     called_record_unrecognized = False
     saw_success_tool = False
 
+    # Tools that are routing/signal helpers — do NOT count as success signals
     disallowed_reset_tools = {
         "record_unrecognized_intent",
         "response_tone_guideline",
         "response_tone_guideline_tool",
         "detect_language",
         "flag_violation",
-        # intent queue tools are routing helpers, not success signals
         "set_pending_intents",
         "advance_intent",
     }
@@ -57,23 +60,14 @@ def count_unrecognized_intents(
     return llm_response
 
 
-def reset_turn_detection(
-    callback_context: CallbackContext,
-    llm_request: LlmRequest,
-) -> Optional[LlmResponse]:
-    """
-    before_model_callback — resets turn_detection state before each model call.
-    """
-    callback_context.state["turn_detection"] = ""
-    return None
-
-
 def reset_unrecognized_intent(
     callback_context: CallbackContext,
 ) -> None:
     """
     before_agent_callback — resets unrecognized_intent_count on sub-agent entry.
-    Never touches violation_count or escalation_recommended (Bug 2 fix).
+
+    Only resets the unrecognized intent counter. Never touches violation_count
+    or escalation_recommended — those must survive sub-agent transitions.
     """
     state = callback_context.state
     if state.get("unrecognized_intent_count", 0) > 0:

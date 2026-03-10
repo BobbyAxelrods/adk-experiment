@@ -12,7 +12,15 @@ from .vas_agent import vas_agent
 from .evaluation_agent import evaluation_agent
 from .callback import count_unrecognized_intents
 
-from tools.policy_tools.policy_tools import update_summary, track_frustration, detect_language, flag_violation, record_unrecognized_intent, set_pending_intents, advance_intent
+from tools.policy_tools.policy_tools import (
+    track_frustration,
+    detect_language,
+    flag_violation,
+    record_unrecognized_intent,
+    set_pending_intents,
+    advance_intent,
+    return_to_bot,
+)
 from tools.tone_management.tone_guideline_tools import response_tone_guideline
 from tools.mcp_escalation.escalation_tools import escalate_to_live_agent
 from ._fragments.loader import load_instruction
@@ -21,16 +29,28 @@ from ._fragments.loader import load_instruction
 USER_ID = "member_default"
 
 INITIAL_STATE = {
-    "frustration_count": 0,
-    "frustration_threshold": 3,
+    # --- User context ---
+    "user_id":                   USER_ID,
+    "language":                  "english",
+    "authentication":            False,
+
+    # --- Counters ---
+    "frustration_count":         0,
+    "violation_count":           0,
     "unrecognized_intent_count": 0,
-    "escalate_to_human": None,
-    "escalation_recommended": False,
-    "user_id": USER_ID,
-    "language": "english",
-    "authentication": False,
-    "pending_intents": [],
-    "current_intent": None,
+
+    # --- Escalation ---
+    "escalation_recommended":    False,
+    "escalated_to_human":        False,
+    "last_escalation_ticket":    None,
+    "escalation_history":        [],
+
+    # --- Multi-intent queue ---
+    "pending_intents":           [],
+    "current_intent":            None,
+
+    # --- Conversation ---
+    # response saved automatically via output_key="root_agent_output" on root_agent
 }
 
 model_name = os.getenv("MODEL_NAME", "gpt-4o")
@@ -45,12 +65,12 @@ root_agent = Agent(
         track_frustration,
         detect_language,
         flag_violation,
-        update_summary,
         response_tone_guideline,
         record_unrecognized_intent,
         escalate_to_live_agent,
         set_pending_intents,
         advance_intent,
+        return_to_bot,
     ],
     sub_agents=[
         rag_agent,
