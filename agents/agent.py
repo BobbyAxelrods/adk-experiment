@@ -12,7 +12,7 @@ from .vas_agent import vas_agent
 from .evaluation_agent import evaluation_agent
 from .callback import count_unrecognized_intents
 
-from tools.policy_tools.policy_tools import update_summary, track_frustration, detect_language, flag_violation, record_unrecognized_intent
+from tools.policy_tools.policy_tools import update_summary, track_frustration, detect_language, flag_violation, record_unrecognized_intent, set_pending_intents, advance_intent
 from tools.tone_management.tone_guideline_tools import response_tone_guideline
 from tools.mcp_escalation.escalation_tools import escalate_to_live_agent
 from ._fragments.loader import load_instruction
@@ -29,6 +29,8 @@ INITIAL_STATE = {
     "user_id": USER_ID,
     "language": "english",
     "authentication": False,
+    "pending_intents": [],
+    "current_intent": None,
 }
 
 model_name = os.getenv("MODEL_NAME", "gpt-4o")
@@ -47,6 +49,8 @@ root_agent = Agent(
         response_tone_guideline,
         record_unrecognized_intent,
         escalate_to_live_agent,
+        set_pending_intents,
+        advance_intent,
     ],
     sub_agents=[
         rag_agent,

@@ -150,10 +150,49 @@ def detect_language(tool_context: ToolContext, language: str) -> dict:
 def update_summary(tool_context: ToolContext, summary: str) -> dict:
     """
     Update conversation summary.
-    
+
     Call this after resolving a patient request to update conversation summary.
     """
     return {"updated": True, "summary": summary}
+
+def set_pending_intents(tool_context: ToolContext, intents: list) -> dict:
+    """
+    Store multiple pending intents in session state for multi-intent handling.
+
+    Call this at the START of a turn when the user message contains more than
+    one distinct intent (e.g. policy question + booking request).
+
+    intents: ordered list of intent labels to process, e.g. ["policy_query", "booking"]
+    The first item becomes current_intent immediately. The rest stay queued.
+    After each sub-agent returns, call advance_intent() to pop the next one.
+    """
+    tool_context.state["pending_intents"] = intents
+    tool_context.state["current_intent"] = intents[0] if intents else None
+    return {
+        "status": "saved",
+        "current_intent": tool_context.state["current_intent"],
+        "pending_intents": intents,
+    }
+
+def advance_intent(tool_context: ToolContext) -> dict:
+    """
+    Pop the first item from pending_intents and set it as current_intent.
+
+    Call this after a sub-agent returns control to the root agent and there
+    are still pending intents left to handle.
+    Returns the next intent to process, or None if the queue is empty.
+    """
+    pending = tool_context.state.get("pending_intents", [])
+    if pending:
+        pending.pop(0)
+    next_intent = pending[0] if pending else None
+    tool_context.state["pending_intents"] = pending
+    tool_context.state["current_intent"] = next_intent
+    return {
+        "next_intent": next_intent,
+        "remaining": len(pending),
+        "done": next_intent is None,
+    }
 
 def record_unrecognized_intent(tool_context: ToolContext) -> dict:
     """
@@ -178,3 +217,5 @@ report_violation_to_root = FunctionTool(func=report_violation_to_root)
 detect_language = FunctionTool(func=detect_language)
 update_summary = FunctionTool(func=update_summary)
 record_unrecognized_intent = FunctionTool(func=record_unrecognized_intent)
+set_pending_intents = FunctionTool(func=set_pending_intents)
+advance_intent = FunctionTool(func=advance_intent)

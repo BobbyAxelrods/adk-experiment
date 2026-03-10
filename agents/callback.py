@@ -28,6 +28,9 @@ def count_unrecognized_intents(
         "response_tone_guideline_tool",
         "detect_language",
         "flag_violation",
+        # intent queue tools are routing helpers, not success signals
+        "set_pending_intents",
+        "advance_intent",
     }
 
     if llm_response.content and llm_response.content.parts:
