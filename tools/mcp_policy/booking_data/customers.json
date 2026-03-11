@@ -1,0 +1,99 @@
+[
+  {
+    "customer_id": "001",
+    "display_name": "Tai (Mock Customer)",
+    "life_assured": [
+      {
+        "la_id": "LA-TAI",
+        "salutation": "Mr",
+        "first_name": "Tai",
+        "display_name": "Mr Tai"
+      },
+      {
+        "la_id": "LA-SUKI",
+        "salutation": "Ms",
+        "first_name": "Suki",
+        "display_name": "Ms Suki"
+      }
+    ],
+    "policies": [
+      {
+        "policy_id": "POL-001",
+        "policy_number": "393363387500",
+        "policy_number_masked": "XXXXXXXX7500",
+        "direct_billing": true,
+        "h2p_eligible": true,
+        "life_assured_ids": [
+          "LA-TAI",
+          "LA-SUKI"
+        ]
+      },
+      {
+        "policy_id": "POL-004",
+        "policy_number": "163726516761",
+        "policy_number_masked": "XXXXXXXX6761",
+        "direct_billing": true,
+        "h2p_eligible": true,
+        "life_assured_ids": [
+          "LA-TAI",
+          "LA-SUKI"
+        ]
+      },
+      {
+        "policy_id": "POL-006",
+        "policy_number": "288200182633",
+        "policy_number_masked": "XXXXXXXX2633",
+        "direct_billing": true,
+        "h2p_eligible": false,
+        "life_assured_ids": [
+          "LA-TAI",
+          "LA-SUKI"
+        ]
+      }
+    ]
+  },
+  {
+    "customer_id": "002",
+    "display_name": "Suki (Mock Customer)",
+    "life_assured": [
+      {
+        "la_id": "LA-SUKI",
+        "salutation": "Ms",
+        "first_name": "Suki",
+        "display_name": "Ms Suki"
+      }
+    ],
+    "policies": [
+      {
+        "policy_id": "POL-002",
+        "policy_number": "474395755131",
+        "policy_number_masked": "XXXXXXXX5131",
+        "direct_billing": true,
+        "h2p_eligible": false,
+        "life_assured_ids": [
+          "LA-SUKI"
+        ]
+      },
+      {
+        "policy_id": "POL-005",
+        "policy_number": "222029729975",
+        "policy_number_masked": "XXXXXXXX9975",
+        "direct_billing": false,
+        "h2p_eligible": true,
+        "life_assured_ids": [
+          "LA-SUKI"
+        ]
+      },
+      {
+        "policy_id": "POL-003",
+        "policy_number": "373537990751",
+        "policy_number_masked": "XXXXXXXX0751",
+        "direct_billing": false,
+        "h2p_eligible": false,
+        "life_assured_ids": [
+          "LA-SUKI"
+        ]
+      }
+    ]
+  }
+]

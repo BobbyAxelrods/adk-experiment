@@ -1,0 +1,143 @@
+{
+  "customers": [
+    {
+      "customer_id": "001",
+      "display_name": "Tai (Mock Customer)",
+      "life_assured": [
+        {
+          "la_id": "LA-TAI",
+          "salutation": "Mr",
+          "first_name": "Tai",
+          "display_name": "Mr Tai"
+        },
+        {
+          "la_id": "LA-SUKI",
+          "salutation": "Ms",
+          "first_name": "Suki",
+          "display_name": "Ms Suki"
+        }
+      ],
+      "policies": [
+        {
+          "policy_id": "POL-001",
+          "policy_number": "393363387500",
+          "policy_number_masked": "XXXXXXXX7500",
+          "direct_billing": true,
+          "h2p_eligible": true,
+          "life_assured_ids": [
+            "LA-TAI",
+            "LA-SUKI"
+          ]
+        },
+        {
+          "policy_id": "POL-004",
+          "policy_number": "163726516761",
+          "policy_number_masked": "XXXXXXXX6761",
+          "direct_billing": true,
+          "h2p_eligible": true,
+          "life_assured_ids": [
+            "LA-TAI",
+            "LA-SUKI"
+          ]
+        }
+      ]
+    },
+    {
+      "customer_id": "002",
+      "display_name": "Suki (Mock Customer)",
+      "life_assured": [
+        {
+          "la_id": "LA-SUKI",
+          "salutation": "Ms",
+          "first_name": "Suki",
+          "display_name": "Ms Suki"
+        }
+      ],
+      "policies": [
+        {
+          "policy_id": "POL-002",
+          "policy_number": "474395755131",
+          "policy_number_masked": "XXXXXXXX5131",
+          "direct_billing": true,
+          "h2p_eligible": false,
+          "life_assured_ids": [
+            "LA-SUKI"
+          ]
+        }
+      ]
+    }
+  ],
+  "appointments": [
+    {
+      "appointment_id": "APT-B0AC227FAD",
+      "idempotency_key": null,
+      "created_at": "2026-02-28T03:31:53Z",
+      "status": "CONFIRMED",
+      "customerId": "001",
+      "policyId": "POL-001",
+      "policyNumberMasked": "XXXXXXXX7500",
+      "forWhom": "life_assured",
+      "lifeAssuredId": "LA-TAI",
+      "locationId": "HK-EA",
+      "location": {
+        "location_id": "HK-EA",
+        "display_name": "Eastern"
+      },
+      "specialtyId": "SP-CARD",
+      "specialtyName": "Cardiology",
+      "appointment_date": "2026-03-01",
+      "time_slot": "14:00",
+      "slot_id": "SLOT-1400"
+    }
+  ],
+  "specialties": [
+    {
+      "specialty_id": "SP-CARD",
+      "display_name": "Cardiology"
+    },
+    {
+      "specialty_id": "SP-DERM",
+      "display_name": "Dermatology"
+    },
+    {
+      "specialty_id": "SP-ENT",
+      "display_name": "ENT (Ear, Nose & Throat)"
+    }
+  ],
+  "locations": [
+    {
+      "location_id": "HK-CW",
+      "display_name": "Central and Western"
+    },
+    {
+      "location_id": "HK-EA",
+      "display_name": "Eastern"
+    },
+    {
+      "location_id": "HK-WC",
+      "display_name": "Wan Chai"
+    },
+    {
+      "location_id": "KL-SSP",
+      "display_name": "Sham Shui Po"
+    },
+    {
+      "location_id": "NT-ST",
+      "display_name": "Sha Tin"
+    }
+  ],
+  "slot_windows": [
+    {
+      "slot_id": "SLOT-1000",
+      "time": "10:00"
+    },
+    {
+      "slot_id": "SLOT-1400",
+      "time": "14:00"
+    },
+    {
+      "slot_id": "SLOT-1600",
+      "time": "16:00"
+    }
+  ]
+}

@@ -1,23 +1,29 @@
-### **Tone Group: Exit Flow**
+# TONE GROUP: EXITFLOW
 
-**Goal:** Close the conversation warmly and clearly.
+**Status:** Conversation Termination Handler  
+**Priority:** Triggered on opt-out, stop, unsubscribe, or natural conversation endings  
+**Source Document:** `exit_flow.pdf`  
+**Inherits From:** `FOUNDATION.md`
 
-**Core Principles:**
-1.  **Summarize & Confirm:** Briefly recap what was done (if applicable).
-2.  **Open Door:** Remind them they can return anytime.
-3.  **Warm Closing:** Use a polite, professional sign-off.
+---
 
-**Key Phrases (Examples):**
-*   "I'm glad I could help you with [Task] today."
-*   "Is there anything else you need before you go?"
-*   "Feel free to reach out whenever you have more questions."
-*   "Take care and have a wonderful day."
+## Purpose
 
-**Avoid:**
-*   Abrupt endings ("Bye", "Done").
-*   Asking open-ended questions if the user indicated they are finished.
-*   Upselling new topics unless relevant.
+This tone group manages conversation endings with grace and respect. It ensures legal compliance with opt-out requirements while preserving the possibility of re-engagement. The goal is to make users feel respected, not abandoned.
 
-**Structure:**
-1.  [Acknowledgement of completion]
-2.  [Offer for further help OR Warm closing]
+---
+
+## When to Use This Tone Group
+
+### Trigger Scenarios
+
+1. **Manual Opt-Out** — "Stop", "Cancel", "Not now", "Pause"
+2. **Graceful End** — "Thank you", "That's all for now", "Goodbye"
+3. **Silent Exit** — No response after multiple re-engagement attempts
+4. **Legal Unsubscribe** — "Unsubscribe", "Stop messages", "Remove me"
+5. **Restart Flow** — "Hi", "Restart", "Continue", "Start again"
+
+---
+
+## Core Response Principles
+

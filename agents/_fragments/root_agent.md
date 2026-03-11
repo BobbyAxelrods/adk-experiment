@@ -52,7 +52,7 @@ Count the number of distinct actionable intents in the user message.
 **Single intent** → skip to Step 6 directly.
 
 **Multiple intents** (e.g. "What does my policy cover AND book me an appointment") → call `set_pending_intents(intents=[...])` with the full ordered list before routing anything.
-- Valid labels: `"policy_query"`, `"booking"`, `"escalation"`, `"greeting"`
+- Valid labels: `"policy_query"`, `"booking"`, `"escalation"`, `"greeting"`, `"greeting"`, `"greeting"`
 - Order by urgency: safety > policy > booking > greeting
 - Example: `set_pending_intents(intents=["policy_query", "booking"])`
 

@@ -1,0 +1,14 @@
+[
+    {
+        "user_id": "9d8e7f6a-5b4c-3d2e-1f0a-9b8c7d6e5a4b",
+        "client_id": ["test_1", "test_2", "test_3"]
+    },
+    {
+        "user_id": "test_456",
+        "client_id": ["test_4", "test_5", "test_6"]
+    },
+    {
+        "user_id": "3b2c1a0d-9e8f-4g7h-6j5k-4l3m2n1o0p9q",
+        "client_id": ["test_7", "test_8", "test_9"]
+    }
+]

@@ -1,0 +1,128 @@
+[
+  {
+    "policy_id": "POL-001",
+    "policy_number": "393363387500",
+    "policy_number_masked": "XXXXXXXX7500",
+    "direct_billing": true,
+    "h2p_eligible": true,
+    "life_assured": [
+      {
+        "la_id": "LA-1-1",
+        "salutation": "Mr",
+        "first_name": "Tai",
+        "display_name": "Mr Tai"
+      },
+      {
+        "la_id": "LA-1-2",
+        "salutation": "Ms",
+        "first_name": "Suki",
+        "display_name": "Ms Suki"
+      }
+    ]
+  },
+  {
+    "policy_id": "POL-002",
+    "policy_number": "474395755131",
+    "policy_number_masked": "XXXXXXXX5131",
+    "direct_billing": true,
+    "h2p_eligible": false,
+    "life_assured": [
+      {
+        "la_id": "LA-2-1",
+        "salutation": "Mr",
+        "first_name": "Tai",
+        "display_name": "Mr Tai"
+      },
+      {
+        "la_id": "LA-2-2",
+        "salutation": "Ms",
+        "first_name": "Suki",
+        "display_name": "Ms Suki"
+      }
+    ]
+  },
+  {
+    "policy_id": "POL-003",
+    "policy_number": "373537990751",
+    "policy_number_masked": "XXXXXXXX0751",
+    "direct_billing": false,
+    "h2p_eligible": false,
+    "life_assured": [
+      {
+        "la_id": "LA-3-1",
+        "salutation": "Mr",
+        "first_name": "Tai",
+        "display_name": "Mr Tai"
+      },
+      {
+        "la_id": "LA-3-2",
+        "salutation": "Ms",
+        "first_name": "Suki",
+        "display_name": "Ms Suki"
+      }
+    ]
+  },
+  {
+    "policy_id": "POL-004",
+    "policy_number": "163726516761",
+    "policy_number_masked": "XXXXXXXX6761",
+    "direct_billing": true,
+    "h2p_eligible": true,
+    "life_assured": [
+      {
+        "la_id": "LA-4-1",
+        "salutation": "Mr",
+        "first_name": "Tai",
+        "display_name": "Mr Tai"
+      },
+      {
+        "la_id": "LA-4-2",
+        "salutation": "Ms",
+        "first_name": "Suki",
+        "display_name": "Ms Suki"
+      }
+    ]
+  },
+  {
+    "policy_id": "POL-005",
+    "policy_number": "222029729975",
+    "policy_number_masked": "XXXXXXXX9975",
+    "direct_billing": false,
+    "h2p_eligible": true,
+    "life_assured": [
+      {
+        "la_id": "LA-5-1",
+        "salutation": "Mr",
+        "first_name": "Tai",
+        "display_name": "Mr Tai"
+      },
+      {
+        "la_id": "LA-5-2",
+        "salutation": "Ms",
+        "first_name": "Suki",
+        "display_name": "Ms Suki"
+      }
+    ]
+  },
+  {
+    "policy_id": "POL-006",
+    "policy_number": "288200182633",
+    "policy_number_masked": "XXXXXXXX2633",
+    "direct_billing": true,
+    "h2p_eligible": false,
+    "life_assured": [
+      {
+        "la_id": "LA-6-1",
+        "salutation": "Mr",
+        "first_name": "Tai",
+        "display_name": "Mr Tai"
+      },
+      {
+        "la_id": "LA-6-2",
+        "salutation": "Ms",
+        "first_name": "Suki",
+        "display_name": "Ms Suki"
+      }
+    ]
+  }
+]

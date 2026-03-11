@@ -108,19 +108,14 @@ def track_frustration(tool_context: ToolContext) -> dict:
 
 Same API as ToolContext. For counters and guards that fire on lifecycle events.
 
-```python
 def count_unrecognized_intents(callback_context: CallbackContext, llm_response):
     state = callback_context.state
     state["unrecognized_intent_count"] = state.get("unrecognized_intent_count", 0) + 1
-```
-
----
 
 ### 6. `EventActions.state_delta` ← programmatic bulk write from outside agent loop
 
 For initialising or updating state from application code (webhooks, startup):
 
-```python
 from google.adk.events import Event, EventActions
 
 actions = EventActions(state_delta={
@@ -129,7 +124,7 @@ actions = EventActions(state_delta={
     "authentication": True,
 })
 await session_service.append_event(session, Event(actions=actions))
-```
+
 
 ---
 

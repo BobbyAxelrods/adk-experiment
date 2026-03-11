@@ -1,38 +1,31 @@
 import os
 from google.adk.agents import Agent
-from google.adk.models.lite_llm import LiteLlm
 from dotenv import load_dotenv
 import sys
 import json
+# Add the project root to the Python path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../../')))
 from typing import Dict, List, Any, Optional
 from tools.mcp_policy.mcp_tools import policy_mcp_tool
-from agents._fragments.loader import load_instruction
 from google.adk.agents.callback_context import CallbackContext
-from google.adk.models import LlmRequest, LlmResponse
 from google.adk.tools.tool_context import ToolContext
 from google.adk.tools.base_tool import BaseTool
 from google.genai import types
 from .callback import reset_unrecognized_intent, count_unrecognized_intents
-from tools.policy_tools.policy_tools import flag_violation, report_violation_to_root, track_frustration, record_unrecognized_intent
-from tools.mcp_escalation.escalation_tools import escalate_to_live_agent
+from utils.agent_config import generate_content_config
+from prompts.manager import prompt_manager
+from pydantic import BaseModel, Field
 
 
 load_dotenv()
-
-model_name = os.getenv("MODEL_NAME", "gpt-4o")
-litellm_model = LiteLlm(model=model_name)
-
-
-def after_tool_update_state_user_policy(
-     tool: BaseTool, args: Dict[str, Any], tool_context: ToolContext, tool_response: Dict
-) -> Optional[Dict]:
+LLM_MODEL = os.getenv("LLM_MODEL", "gemini-2.5-flash")
+def after_tool_update_state_user_policy(tool: BaseTool, args: Dict[str, Any], tool_context: ToolContext, tool_response: Dict) -> Optional[Dict]:
     '''
-        Update the user_policy data to state and enrich tool response after getting
+        Update the user_policy data to state and enrich tool response after getting 
         the data from get_user_policy_and_products.
     '''
     tool_name = tool.name
-
+    
     # ONLY perform enrichment and state updates for the specific policy detail tool
     if tool_name != 'get_user_policy_and_products':
         return None
@@ -44,10 +37,10 @@ def after_tool_update_state_user_policy(
         content_list = tool_response.get('content', [])
         if not content_list:
             return None
-
+            
         policy_data_string = content_list[0].get('text', '[]')
         policy_detail = json.loads(policy_data_string)
-
+        
         if not isinstance(policy_detail, list):
             return None
 
@@ -67,33 +60,36 @@ def after_tool_update_state_user_policy(
         for item in policy_detail:
             if not isinstance(item, dict):
                 continue
-
+                
             product_name = item.get("policy_product_name")
             if product_name:
                 product_names.append(product_name)
-
+                
                 # Find all matching metadata entries for this product
                 matches = [m for m in product_metadata if m.get("Product") == product_name]
-
+                
                 if matches:
                     # Set the URL from the first match found
                     item["product_url"] = matches[0].get("URL")
-
+                    
                     # Aggregate all unique VAS services
                     all_vas = set()
                     for m in matches:
                         vas_str = m.get("VAS", "NA")
                         if vas_str and vas_str != "NA":
+                            # Split by semicolon, strip whitespace, and add to set
                             services = [s.strip() for s in vas_str.split(";") if s.strip()]
                             all_vas.update(services)
-
+                    
+                    # Assign aggregated VAS as a sorted list
                     item["product_vas"] = sorted(list(all_vas))
-
+            
             enriched_policy_detail.append(item)
 
         # Update state only when we actually have policy data
         if enriched_policy_detail:
             tool_context.state['user_policy'] = enriched_policy_detail
+            # Deduplicate product name list
             tool_context.state['user_product_name_list'] = list(dict.fromkeys(product_names))
 
             print(f"Updated user_policy in state with {len(enriched_policy_detail)} items")
@@ -110,58 +106,54 @@ def after_tool_update_state_user_policy(
         return None
 
 
-def _require_authentication_before_policy_lookup(
-    callback_context: CallbackContext,
-    llm_request: Optional[LlmRequest] = None,
-    **kwargs: Any,
-) -> Optional[LlmResponse]:
-    state_obj = callback_context.state
-    state: Dict[str, Any]
-    if hasattr(state_obj, "to_dict"):
-        state = state_obj.to_dict()
-    else:
-        state = state_obj  # type: ignore[assignment]
+def check_user_authentication(callback_context: CallbackContext) -> Optional[types.Content]:
+    agent_name = callback_context.agent_name
+    invocation_id = callback_context.invocation_id
+    current_state = callback_context.state.to_dict()
+    print(444, current_state)
+    print(f"\n[Callback] Entering agent: {agent_name} (Inv: {invocation_id})")
+    print(f"[Callback] Current State: {current_state}")
 
-    auth_value = state.get("authentication")
-    is_authenticated = False
-    
-    if isinstance(auth_value, bool):
-        is_authenticated = auth_value
-    elif isinstance(auth_value, str):
-        is_authenticated = auth_value.lower() == "true"
-    
-    print(f"[Callback] Checking auth in {callback_context.agent_name}. Value: {auth_value} (Type: {type(auth_value)}), Is Authenticated: {is_authenticated}")
-
-    if is_authenticated:
-        # If user is authenticated, explicitly set required flag to False
-        # This signals the prompt gate that it's safe to proceed
-        callback_context.state["authentication_required"] = False
+    if current_state.get('authentication'):
+        print(f"[Callback] User authenticated: Proceeding with agent {agent_name}.")
         return None
+    else:
+        print(f"[Callback] State condition 'skip_llm_agent=True' met: Skipping agent {agent_name}.")
+        return types.Content(
+            parts=[types.Part(text=f"Please authenticate first by confirming your OTP code.")],
+            role="model" 
+        )
 
-    try:
-        callback_context.state["authentication_required"] = True
-        # callback_context.state["authentication_required_agent"] = callback_context.agent_name
-    except Exception:
-        pass
 
-    return None
+def load_instructions(instruction_file_name):
+    """Legacy wrapper for backward compatibility or direct file loads if needed."""
+    return prompt_manager.get_instruction(instruction_file_name)
+
+
+class UserIdInput(BaseModel):
+    user_id: str = Field(description="The user_id to search")
+
+
+def my_before_tool_callback(tool: BaseTool, args: dict[str, Any], tool_context: ToolContext) -> Optional[dict[str, Any]]:
+    """Injects user_id from state into tool arguments before execution."""
+    # just make sure the user_id would always added to args before call get_user_clint_id_list
+    if tool.name == "get_user_client_id_list":
+        user_id = tool_context.state.get("user_id")
+        if user_id and user_id not in args:
+            args["user_id"] = user_id
+    return None 
 
 
 policy_mcp_agent = Agent(
     name="policy_mcp_agent",
-    model=litellm_model,
+    model=LLM_MODEL,
     description="Agent with ability to call policy mcp tool when user ask their own policy or product",
-    instruction=load_instruction("policy_mcp_agent"),
-    tools=[
-        policy_mcp_tool,
-        flag_violation,
-        report_violation_to_root,
-        track_frustration,
-        record_unrecognized_intent,
-        escalate_to_live_agent
-    ],
+    instruction=load_instructions("policy_mcp_agent"),
+    generate_content_config=generate_content_config,
+    tools=[policy_mcp_tool],
     after_tool_callback=after_tool_update_state_user_policy,
-    before_model_callback=_require_authentication_before_policy_lookup,
-    before_agent_callback=reset_unrecognized_intent,
+    before_agent_callback=check_user_authentication,
+    before_tool_callback=my_before_tool_callback,
     after_model_callback=count_unrecognized_intents,
+
 )

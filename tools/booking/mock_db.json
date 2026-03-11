@@ -1,0 +1,724 @@
+{
+    "policies": {
+        "936005": {
+            "in_network_provider_ids": [
+                "prov_derm_1",
+                "prov_alle_1",
+                "prov_cardio_1",
+                "prov_nero_1",
+                "prov_gas_1",
+                "prov_gp_1",
+                "prov_gp_2",
+                "prov_gp_3",
+                "prov_gp_4",
+                "prov_gp_5",
+                "prov_gp_6",
+                "prov_gp_7",
+                "prov_gp_8",
+                "prov_gp_9",
+                "prov_gp_10",
+                "prov_gp_11",
+                "prov_gp_12",
+                "prov_gp_13",
+                "prov_gp_14",
+                "prov_gp_15",
+                "prov_gp_16",
+                "prov_gp_17",
+                "prov_gp_18",
+                "prov_ped_1",
+                "prov_ortho_1",
+                "prov_ophth_1",
+                "prov_psych_1",
+                "prov_ent_1",
+                "prov_gp_19",
+                "prov_obgyn_1",
+                "prov_derm_2",
+                "prov_endo_1",
+                "prov_cardio_2",
+                "prov_uro_1"
+            ]
+        },
+        "PL10001": {
+            "in_network_provider_ids": [
+                "prov_derm_1",
+                "prov_alle_1",
+                "prov_cardio_1",
+                "prov_nero_1",
+                "prov_gas_1",
+                "prov_gp_1",
+                "prov_gp_2",
+                "prov_gp_3",
+                "prov_gp_4",
+                "prov_gp_5",
+                "prov_gp_6",
+                "prov_gp_7",
+                "prov_gp_8",
+                "prov_gp_9",
+                "prov_gp_10",
+                "prov_gp_11",
+                "prov_gp_12",
+                "prov_gp_13",
+                "prov_gp_14",
+                "prov_gp_15",
+                "prov_gp_16",
+                "prov_gp_17",
+                "prov_gp_18",
+                "prov_ped_1",
+                "prov_ortho_1",
+                "prov_ophth_1",
+                "prov_psych_1",
+                "prov_ent_1",
+                "prov_gp_19",
+                "prov_obgyn_1",
+                "prov_derm_2",
+                "prov_endo_1",
+                "prov_cardio_2",
+                "prov_uro_1"
+            ]
+        },
+        "PL10002": {
+            "in_network_provider_ids": [
+                "prov_derm_1",
+                "prov_alle_1",
+                "prov_cardio_1",
+                "prov_nero_1",
+                "prov_gas_1",
+                "prov_gp_1",
+                "prov_gp_2",
+                "prov_gp_3",
+                "prov_gp_4",
+                "prov_gp_5",
+                "prov_gp_6",
+                "prov_gp_7",
+                "prov_gp_8",
+                "prov_gp_9",
+                "prov_gp_10",
+                "prov_gp_11",
+                "prov_gp_12",
+                "prov_gp_13",
+                "prov_gp_14",
+                "prov_gp_15",
+                "prov_gp_16",
+                "prov_gp_17",
+                "prov_gp_18",
+                "prov_ped_1",
+                "prov_ortho_1",
+                "prov_ophth_1",
+                "prov_psych_1",
+                "prov_ent_1",
+                "prov_gp_19",
+                "prov_obgyn_1",
+                "prov_derm_2",
+                "prov_endo_1",
+                "prov_cardio_2",
+                "prov_uro_1"
+            ]
+        },
+        "PL10003": {
+            "in_network_provider_ids": [
+                "prov_derm_1",
+                "prov_alle_1",
+                "prov_cardio_1",
+                "prov_nero_1",
+                "prov_gas_1",
+                "prov_gp_1",
+                "prov_gp_2",
+                "prov_gp_3",
+                "prov_gp_4",
+                "prov_gp_5",
+                "prov_gp_6",
+                "prov_gp_7",
+                "prov_gp_8",
+                "prov_gp_9",
+                "prov_gp_10",
+                "prov_gp_11",
+                "prov_gp_12",
+                "prov_gp_13",
+                "prov_gp_14",
+                "prov_gp_15",
+                "prov_gp_16",
+                "prov_gp_17",
+                "prov_gp_18",
+                "prov_ped_1",
+                "prov_ortho_1",
+                "prov_ophth_1",
+                "prov_psych_1",
+                "prov_ent_1",
+                "prov_gp_19",
+                "prov_obgyn_1",
+                "prov_derm_2",
+                "prov_endo_1",
+                "prov_cardio_2",
+                "prov_uro_1"
+            ]
+        },
+        "PL10004": {
+            "in_network_provider_ids": [
+                "prov_derm_1",
+                "prov_alle_1",
+                "prov_cardio_1",
+                "prov_nero_1",
+                "prov_gas_1",
+                "prov_gp_1",
+                "prov_gp_2",
+                "prov_gp_3",
+                "prov_gp_4",
+                "prov_gp_5",
+                "prov_gp_6",
+                "prov_gp_7",
+                "prov_gp_8",
+                "prov_gp_9",
+                "prov_gp_10",
+                "prov_gp_11",
+                "prov_gp_12",
+                "prov_gp_13",
+                "prov_gp_14",
+                "prov_gp_15",
+                "prov_gp_16",
+                "prov_gp_17",
+                "prov_gp_18",
+                "prov_ped_1",
+                "prov_ortho_1",
+                "prov_ophth_1",
+                "prov_psych_1",
+                "prov_ent_1",
+                "prov_gp_19",
+                "prov_obgyn_1",
+                "prov_derm_2",
+                "prov_endo_1",
+                "prov_cardio_2",
+                "prov_uro_1"
+            ]
+        },
+        "PL10005": {
+            "in_network_provider_ids": [
+                "prov_derm_1",
+                "prov_alle_1",
+                "prov_cardio_1",
+                "prov_nero_1",
+                "prov_gas_1",
+                "prov_gp_1",
+                "prov_gp_2",
+                "prov_gp_3",
+                "prov_gp_4",
+                "prov_gp_5",
+                "prov_gp_6",
+                "prov_gp_7",
+                "prov_gp_8",
+                "prov_gp_9",
+                "prov_gp_10",
+                "prov_gp_11",
+                "prov_gp_12",
+                "prov_gp_13",
+                "prov_gp_14",
+                "prov_gp_15",
+                "prov_gp_16",
+                "prov_gp_17",
+                "prov_gp_18",
+                "prov_ped_1",
+                "prov_ortho_1",
+                "prov_ophth_1",
+                "prov_psych_1",
+                "prov_ent_1",
+                "prov_gp_1",
+                "prov_obgyn_1",
+                "prov_derm_2",
+                "prov_endo_1",
+                "prov_cardio_2",
+                "prov_uro_1"
+            ]
+        }
+    },
+    "providers": {
+        "prov_alle_1": {
+            "name": "Dr. Vanessa Chan",
+            "specialty": "Allergy & Immunology",
+            "district": "Sai Kung",
+            "daily_schedule": [
+                "09:00",
+                "10:00",
+                "11:00",
+                "14:00"
+            ]
+        },
+        "prov_derm_1": {
+            "name": "Dr. Sarah Cheung",
+            "specialty": "dermatology",
+            "district": "Central and Western",
+            "daily_schedule": [
+                "09:00",
+                "10:00",
+                "11:00",
+                "14:00"
+            ]
+        },
+        "prov_nero_1": {
+            "name": "Dr. Dave Lim",
+            "specialty": "Neurology",
+            "district": "Sham Shui Po",
+            "daily_schedule": [
+                "09:00",
+                "10:00",
+                "11:00",
+                "14:00"
+            ]
+        },
+        "prov_gas_1": {
+            "name": "Dr. Adrien Cheh",
+            "specialty": "Gastroenterology",
+            "district": "Yuen Long",
+            "daily_schedule": [
+                "09:00",
+                "10:00",
+                "11:00",
+                "14:00"
+            ]
+        },
+        "prov_cardio_1": {
+            "name": "Dr. James Wong",
+            "specialty": "cardiology",
+            "district": "Yau Tsim Mong",
+            "daily_schedule": [
+                "10:00",
+                "11:00",
+                "14:00",
+                "16:00"
+            ]
+        },
+        "prov_ped_1": {
+            "name": "Dr. Emily Lau",
+            "specialty": "Pediatrics",
+            "district": "Sha Tin",
+            "daily_schedule": [
+                "09:30",
+                "10:30",
+                "15:00",
+                "16:00",
+                "17:00"
+            ]
+        },
+        "prov_ortho_1": {
+            "name": "Dr. Michael Chen",
+            "specialty": "Orthopedics",
+            "district": "Wan Chai",
+            "daily_schedule": [
+                "09:00",
+                "11:00",
+                "14:00",
+                "15:30"
+            ]
+        },
+        "prov_ophth_1": {
+            "name": "Dr. Jennifer Ho",
+            "specialty": "Ophthalmology",
+            "district": "Kowloon City",
+            "daily_schedule": [
+                "10:00",
+                "11:30",
+                "14:30",
+                "16:00"
+            ]
+        },
+        "prov_psych_1": {
+            "name": "Dr. Alan Tam",
+            "specialty": "Psychiatry",
+            "district": "Eastern",
+            "daily_schedule": [
+                "11:00",
+                "13:00",
+                "15:00",
+                "17:00"
+            ]
+        },
+        "prov_ent_1": {
+            "name": "Dr. Kelly Ng",
+            "specialty": "Otorhinolaryngology (ENT)",
+            "district": "Tsuen Wan",
+            "daily_schedule": [
+                "08:30",
+                "09:30",
+                "12:00",
+                "14:00"
+            ]
+        },
+        "prov_obgyn_1": {
+            "name": "Dr. Rachel Tsang",
+            "specialty": "Obstetrics & Gynecology",
+            "district": "Southern",
+            "daily_schedule": [
+                "10:00",
+                "12:00",
+                "14:00",
+                "16:00"
+            ]
+        },
+        "prov_derm_2": {
+            "name": "Dr. Vincent Lee",
+            "specialty": "Dermatology",
+            "district": "Tuen Mun",
+            "daily_schedule": [
+                "09:00",
+                "11:30",
+                "14:00",
+                "15:00",
+                "16:30"
+            ]
+        },
+        "prov_endo_1": {
+            "name": "Dr. Susan Yip",
+            "specialty": "Endocrinology",
+            "district": "Tai Po",
+            "daily_schedule": [
+                "09:15",
+                "10:45",
+                "13:30",
+                "15:15"
+            ]
+        },
+        "prov_cardio_2": {
+            "name": "Dr. Henry Ma",
+            "specialty": "Cardiology",
+            "district": "Central and Western",
+            "daily_schedule": [
+                "08:00",
+                "09:00",
+                "10:00",
+                "11:00"
+            ]
+        },
+        "prov_uro_1": {
+            "name": "Dr. Gary Chiu",
+            "specialty": "Urology",
+            "district": "Wong Tai Sin",
+            "daily_schedule": [
+                "10:30",
+                "11:30",
+                "14:30",
+                "15:30",
+                "16:30"
+            ]
+        },
+        "prov_gp_1": {
+            "name": "Dr. Alan Chan",
+            "specialty": "general_practice",
+            "district": "Central and Western",
+            "daily_schedule": [
+                "09:00",
+                "10:00",
+                "11:00",
+                "14:00",
+                "15:00"
+            ]
+        },
+        "prov_gp_2": {
+            "name": "Dr. Emily Lam",
+            "specialty": "general_practice",
+            "district": "Wan Chai",
+            "daily_schedule": [
+                "09:00",
+                "10:00",
+                "11:00",
+                "14:00",
+                "15:00"
+            ]
+        },
+        "prov_gp_3": {
+            "name": "Dr. David Ho",
+            "specialty": "general_practice",
+            "district": "Eastern",
+            "daily_schedule": [
+                "09:00",
+                "10:00",
+                "11:00",
+                "14:00",
+                "15:00"
+            ]
+        },
+        "prov_gp_4": {
+            "name": "Dr. Fiona Tsang",
+            "specialty": "general_practice",
+            "district": "Southern",
+            "daily_schedule": [
+                "09:00",
+                "10:00",
+                "11:00",
+                "14:00",
+                "15:00"
+            ]
+        },
+        "prov_gp_5": {
+            "name": "Dr. George Lee",
+            "specialty": "general_practice",
+            "district": "Yau Tsim Mong",
+            "daily_schedule": [
+                "09:00",
+                "10:00",
+                "11:00",
+                "14:00",
+                "15:00"
+            ]
+        },
+        "prov_gp_6": {
+            "name": "Dr. Helen Kwok",
+            "specialty": "general_practice",
+            "district": "Sham Shui Po",
+            "daily_schedule": [
+                "09:00",
+                "10:00",
+                "11:00",
+                "14:00",
+                "15:00"
+            ]
+        },
+        "prov_gp_7": {
+            "name": "Dr. Ivan Ng",
+            "specialty": "general_practice",
+            "district": "Kowloon City",
+            "daily_schedule": [
+                "09:00",
+                "10:00",
+                "11:00",
+                "14:00",
+                "15:00"
+            ]
+        },
+        "prov_gp_8": {
+            "name": "Dr. Janice Ma",
+            "specialty": "general_practice",
+            "district": "Wong Tai Sin",
+            "daily_schedule": [
+                "09:00",
+                "10:00",
+                "11:00",
+                "14:00",
+                "15:00"
+            ]
+        },
+        "prov_gp_9": {
+            "name": "Dr. Kevin Cheng",
+            "specialty": "general_practice",
+            "district": "Kwun Tong",
+            "daily_schedule": [
+                "09:00",
+                "10:00",
+                "11:00",
+                "14:00",
+                "15:00"
+            ]
+        },
+        "prov_gp_10": {
+            "name": "Dr. Laura Yip",
+            "specialty": "general_practice",
+            "district": "Kwai Tsing",
+            "daily_schedule": [
+                "09:00",
+                "10:00",
+                "11:00",
+                "14:00",
+                "15:00"
+            ]
+        },
+        "prov_gp_11": {
+            "name": "Dr. Michael Tam",
+            "specialty": "general_practice",
+            "district": "Tsuen Wan",
+            "daily_schedule": [
+                "09:00",
+                "10:00",
+                "11:00",
+                "14:00",
+                "15:00"
+            ]
+        },
+        "prov_gp_12": {
+            "name": "Dr. Nancy Tse",
+            "specialty": "general_practice",
+            "district": "Tuen Mun",
+            "daily_schedule": [
+                "09:00",
+                "10:00",
+                "11:00",
+                "14:00",
+                "15:00"
+            ]
+        },
+        "prov_gp_13": {
+            "name": "Dr. Oscar Fung",
+            "specialty": "general_practice",
+            "district": "Yuen Long",
+            "daily_schedule": [
+                "09:00",
+                "10:00",
+                "11:00",
+                "14:00",
+                "15:00"
+            ]
+        },
+        "prov_gp_14": {
+            "name": "Dr. Peggy Lau",
+            "specialty": "general_practice",
+            "district": "North",
+            "daily_schedule": [
+                "09:00",
+                "10:00",
+                "11:00",
+                "14:00",
+                "15:00"
+            ]
+        },
+        "prov_gp_15": {
+            "name": "Dr. Quinn Chow",
+            "specialty": "general_practice",
+            "district": "Tai Po",
+            "daily_schedule": [
+                "09:00",
+                "10:00",
+                "11:00",
+                "14:00",
+                "15:00"
+            ]
+        },
+        "prov_gp_16": {
+            "name": "Dr. Robert Mok",
+            "specialty": "general_practice",
+            "district": "Sha Tin",
+            "daily_schedule": [
+                "09:00",
+                "10:00",
+                "11:00",
+                "14:00",
+                "15:00"
+            ]
+        },
+        "prov_gp_17": {
+            "name": "Dr. Susan Tang",
+            "specialty": "general_practice",
+            "district": "Sai Kung",
+            "daily_schedule": [
+                "09:00",
+                "10:00",
+                "11:00",
+                "14:00",
+                "15:00"
+            ]
+        },
+        "prov_gp_18": {
+            "name": "Dr. Thomas Yeung",
+            "specialty": "general_practice",
+            "district": "Islands",
+            "daily_schedule": [
+                "09:00",
+                "10:00",
+                "11:00",
+                "14:00",
+                "15:00"
+            ]
+        }
+    },
+    "appointments": {
+        "APT_A15C56AA": {
+            "patient_id": "user_hk_888",
+            "policy_id": "POL_HK_001",
+            "provider_id": "prov_cardio_1",
+            "date": "2026-03-01",
+            "time": "11:00",
+            "status": "CONFIRMED"
+        },
+        "APT_B1F0E449": {
+            "patient_id": "dummy_patient_id",
+            "policy_id": "PL10001",
+            "provider_id": "prov_gp_1",
+            "date": "2026-03-05",
+            "time": "15:00",
+            "status": "CONFIRMED"
+        },
+        "APT_AD86EF38": {
+            "patient_id": "dummy_patient_id",
+            "policy_id": "PL10001",
+            "provider_id": "prov_gp_1",
+            "date": "2026-03-04",
+            "time": "15:00",
+            "status": "CONFIRMED"
+        },
+        "APT_7A9D54F7": {
+            "patient_id": "test_patient",
+            "policy_id": "936005",
+            "provider_id": "prov_cardio_2",
+            "date": "2026-03-11",
+            "time": "08:00",
+            "status": "CONFIRMED"
+        },
+        "APT_1455BC4C": {
+            "patient_id": "test_2",
+            "policy_id": "PL10001",
+            "provider_id": "prov_cardio_2",
+            "date": "2026-03-10",
+            "time": "08:00",
+            "status": "CONFIRMED"
+        },
+<<<<<<< HEAD
+        "APT_5D1CEA21": {
+            "patient_id": "patient_id_example",
+=======
+        "APT_54C48F7F": {
+            "patient_id": "dummy_patient_id",
+            "policy_id": "936005",
+            "provider_id": "prov_cardio_2",
+            "date": "2026-03-10",
+            "time": "09:00",
+            "status": "CONFIRMED"
+        },
+        "APT_12B6E8F9": {
+            "patient_id": "test_1",
+            "policy_id": "936005",
+            "provider_id": "prov_cardio_2",
+            "date": "2026-03-10",
+            "time": "10:00",
+            "status": "CONFIRMED"
+        },
+        "APT_4115CEE6": {
+            "patient_id": "9d8e7f6a-5b4c-3d2e-1f0a-9b8c7d6e5a4b",
+            "policy_id": "936005",
+            "provider_id": "prov_cardio_2",
+            "date": "2026-03-13",
+            "time": "11:00",
+            "status": "CONFIRMED"
+        },
+        "APT_FA79209A": {
+            "patient_id": "9d8e7f6a-5b4c-3d2e-1f0a-9b8c7d6e5a4b",
+>>>>>>> feature/gtm-main
+            "policy_id": "936005",
+            "provider_id": "prov_cardio_2",
+            "date": "2026-03-10",
+            "time": "11:00",
+            "status": "CONFIRMED"
+<<<<<<< HEAD
+=======
+        },
+        "APT_63A4DEA2": {
+            "patient_id": "9d8e7f6a-5b4c-3d2e-1f0a-9b8c7d6e5a4b",
+            "policy_id": "936005",
+            "provider_id": "prov_cardio_2",
+            "date": "2026-03-13",
+            "time": "10:00",
+            "status": "CONFIRMED"
+        },
+        "APT_F1E6FA3E": {
+            "patient_id": "9d8e7f6a-5b4c-3d2e-1f0a-9b8c7d6e5a4b",
+            "policy_id": "936005",
+            "provider_id": "prov_cardio_2",
+            "date": "2026-03-13",
+            "time": "08:00",
+            "status": "CONFIRMED"
+        },
+        "APT_EBF8D4B2": {
+            "patient_id": "9d8e7f6a-5b4c-3d2e-1f0a-9b8c7d6e5a4b",
+            "policy_id": "936005",
+            "provider_id": "prov_cardio_2",
+            "date": "2026-03-11",
+            "time": "11:00",
+            "status": "CONFIRMED"
+>>>>>>> feature/gtm-main
+        }
+    }
+}

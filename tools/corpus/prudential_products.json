@@ -1,0 +1,125 @@
+{
+  "Product": [
+    {
+      "Product": "Prudential Encash Hospital Cash Savings Insurance",
+      "Documents": "dbso-flyer.pdf",
+      "URL": "https://www.prudential.com.hk/en/products/health/medical/pru-encash-hospital-cash-savings-insurance/",
+      "VAS": "NA"
+    },
+    {
+      "Product": "Prudential Encash Hospital Cash Savings Insurance",
+      "Documents": "encash-product-brochure_hk.pdf",
+      "URL": "https://www.prudential.com.hk/en/products/health/medical/pru-encash-hospital-cash-savings-insurance/",
+      "VAS": "SmartAppoint Service"
+    },
+    {
+      "Product": "Prudential Encash Hospital Cash Savings Insurance",
+      "Documents": "encash-product-brochure_mc.pdf",
+      "URL": "https://www.prudential.com.hk/en/products/health/medical/pru-encash-hospital-cash-savings-insurance/",
+      "VAS": "SmartAppoint Service"
+    },
+    {
+      "Product": "PremierFlex Medical Plan",
+      "Documents": "premierflex-medical-plan-product-brochure_hk.pdf",
+      "URL": "https://www.prudential.com.hk/en/products/health/medical/premierflex-medical-plan/",
+      "VAS": "SmartAppoint Service; HealthCare+; Medical Green Channel; Medical Expenses Direct Billing Service"
+    },
+    {
+      "Product": "PremierFlex Medical Plan",
+      "Documents": "premierflex-medical-plan-product-brochure_mc.pdf",
+      "URL": "https://www.prudential.com.hk/en/products/health/medical/premierflex-medical-plan/",
+      "VAS": "SmartAppoint Service; HealthCare+; Medical Green Channel; Medical Expenses Direct Billing Service"
+    },
+    {
+      "Product": "PRUHealth CoreChoice Medical Plan",
+      "Documents": "pruhealth-corechoice-medical-plan-premium-table-en.pdf",
+      "URL": "https://www.prudential.com.hk/en/products/health/medical/prudential-VHIS-series/pruhealth-corechoice-medical-plan/",
+      "VAS": "NA"
+    },
+    {
+      "Product": "PRUHealth CoreChoice Medical Plan",
+      "Documents": "pruhealth-corechoice-medical-plan-product-brochure.pdf",
+      "URL": "https://www.prudential.com.hk/en/products/health/medical/prudential-VHIS-series/pruhealth-corechoice-medical-plan/",
+      "VAS": "Medical Green Channel; Treatment Sure; Medical Expenses Direct Billing Service; SmartAppoint Service; 24-hour Worldwide Emergency Assistance Services"
+    },
+    {
+      "Product": "PRUhealth medical plus",
+      "Documents": "pruhealth-medical-plus-2024-product-brochure_hk.pdf",
+      "URL": "https://www.prudential.com.hk/en/products/health/medical/pruhealth-medical-plus/",
+      "VAS": "Medical Green Channel; Treatment Sure; Medical Expenses Direct Billing Service; SmartAppoint Service; 24-hour Worldwide Emergency Assistance Services"
+    },
+    {
+      "Product": "PRUhealth medical plus",
+      "Documents": "pruhealth-medical-plus-product-brochure_mc.pdf",
+      "URL": "https://www.prudential.com.hk/en/products/health/medical/pruhealth-medical-plus/",
+      "VAS": "Medical Green Channel; Treatment Sure; Medical Expenses Direct Billing Service; SmartAppoint Service; 24-hour Worldwide Emergency Assistance Services"
+    },
+    {
+      "Product": "PRUHealth VHIS EasyChoice Plan",
+      "Documents": "pruhealth-vhis-easychoice-plan-premium-table.pdf",
+      "URL": "https://www.prudential.com.hk/en/products/health/medical/prudential-VHIS-series/pruhealth-vhis-easychoice-plan/",
+      "VAS": "NA"
+    },
+    {
+      "Product": "PRUHealth VHIS EasyChoice Plan",
+      "Documents": "pruhealth-vhis-easychoice-plan-product-brochure.pdf",
+      "URL": "https://www.prudential.com.hk/en/products/health/medical/prudential-VHIS-series/pruhealth-vhis-easychoice-plan/",
+      "VAS": "Medical Green Channel; Treatment Sure; Medical Expenses Direct Billing Service; SmartAppoint Service; 24-hour Worldwide Emergency Assistance Services"
+    },
+    {
+      "Product": "PRUHealth VHIS VIP Plan",
+      "Documents": "pruhealth-vhis-vip-plan-en.pdf",
+      "URL": "https://www.prudential.com.hk/en/products/health/medical/prudential-VHIS-series/pruhealth-vhis-vip-plan/",
+      "VAS": "Medical Green Channel; Treatment Sure; Medical Expenses Direct Billing Service; SmartAppoint Service; 24-hour Worldwide Emergency Assistance Services"
+    },
+    {
+      "Product": "PRUHealth VHIS VIP Plan",
+      "Documents": "pruhealth-vhis-vip-premium-table.pdf",
+      "URL": "https://www.prudential.com.hk/en/products/health/medical/prudential-VHIS-series/pruhealth-vhis-vip-plan/",
+      "VAS": "NA"
+    },
+    {
+      "Product": "PRUmyhealth prestige medical plan",
+      "Documents": "prumyhealth-prestige-medical-plan-2025-product-brochure.pdf",
+      "URL": "https://www.prudential.com.hk/en/products/health/medical/prumyhealth-prestige-medical-plan/",
+      "VAS": "Medical Green Channel; Treatment Sure; Medical Expenses Direct Billing Service; SmartAppoint Service; 24-hour Worldwide Emergency Assistance Services"
+    }
+  ],
+  "VAS": [
+    {
+      "VAS": "Medical Green Channel",
+      "Documents": "Medical Green Channel.docx",
+      "URL": "https://www.prudential.com.hk/en/claims-and-services/health-services/value-added-service/green-channel/#main-content"
+    },
+    {
+      "VAS": "Medical Expenses Direct Billing Service",
+      "Documents": "Medical Network - Medical Expenses Direct Billing Service.docx",
+      "URL": "https://www.prudential.com.hk/en/claims-and-services/claims/medical-expenses-direct-billing-service/#main-content"
+    },
+    {
+      "VAS": "PRUHealth Team",
+      "Documents": "PRUHealth Team.docx",
+      "URL": "https://www.prudential.com.hk/en/claims-and-services/health-services/pruhealth-team/#main-content"
+    },
+    {
+      "VAS": "SmartAppoint Service",
+      "Documents": "SmartAppoint Service.docx",
+      "URL": "https://www.prudential.com.hk/en/claims-and-services/health-services/value-added-service/smartappoint-service/#main-content"
+    },
+    {
+      "VAS": "Treatment Sure",
+      "Documents": "Treatment Sure.docx",
+      "URL": "https://www.prudential.com.hk/en/claims-and-services/health-services/value-added-service/treatment-sure/#main-content"
+    },
+    {
+      "VAS": "HealthCare+",
+      "Documents": "What is HealthCare+_.docx",
+      "URL": "https://www.prudential.com.hk/en/claims-and-services/healthcare-plus/#main-content"
+    },
+    {
+      "VAS": "Worldwide emergency assistance services",
+      "Documents": "Worldwide emergency assistance services.docx",
+      "URL": "https://www.prudential.com.hk/en/claims-and-services/health-services/value-added-service/worldwide-emergency-service/"
+    }
+  ]
+}

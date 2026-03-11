@@ -1,35 +1,23 @@
 import os
 from google.adk.agents import Agent
-from google.adk.models.lite_llm import LiteLlm
 from tools.corpus.corpus_tools import query_corpus
 from tools.tone_management.tone_guideline_tools import response_tone_guideline
 from tools.mcp_policy.mcp_tools import policy_mcp_tool
-from tools.policy_tools.policy_tools import flag_violation, report_violation_to_root, track_frustration, record_unrecognized_intent
-from tools.mcp_escalation.escalation_tools import escalate_to_live_agent
-from .callback import reset_unrecognized_intent, count_unrecognized_intents
+from utils.agent_config import generate_content_config
 
 
-from ._fragments.loader import load_instruction
+def load_instructions(file_name):
+    path = os.path.join(os.path.dirname(__file__), f"{file_name}.md")
+    with open(path, "r", encoding="utf-8") as f:
+        return f.read()
 
-
-model_name = os.getenv("MODEL_NAME", "gpt-4o")
-litellm_model = LiteLlm(model=model_name)
+model = os.getenv("MODEL_NAME", "gemini-2.5-flash")
 
 vas_agent = Agent(
     name="vas_agent",
-    model=litellm_model,
+    model=model,
     description="Factual knowledge agent for Prudential insurance value-added services (vas) inquiries",
-    instruction=load_instruction("vas_agent"),
-    tools=[
-        query_corpus,
-        response_tone_guideline,
-        policy_mcp_tool,
-        flag_violation,
-        report_violation_to_root,
-        track_frustration,
-        record_unrecognized_intent,
-        escalate_to_live_agent
-    ],
-    before_agent_callback=reset_unrecognized_intent,
-    after_model_callback=count_unrecognized_intents,
+    instruction=load_instructions("vas_agent_instruction"),
+    generate_content_config=generate_content_config,
+    tools=[query_corpus, response_tone_guideline, policy_mcp_tool],
 )

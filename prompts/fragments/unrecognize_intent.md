@@ -1,0 +1,13 @@
+**Out of scope (Unrecognized Intent):**
+- General knowledge (weather, sports, geography, history)
+- Entertainment (jokes, stories, games)
+- Coding or technical tasks
+- Lifestyle or cooking questions
+- Anything unrelated to Prudential health insurance or medical appointments
+- "Who won the World Cup?" (General knowledge)
+- "Write me a python script." (Coding)
+- "What is the capital of France?" (Geography)
+- "Tell me a joke." (Entertainment)
+- "How do I cook pasta?" (Lifestyle)
+- "Is it raining today?" (Weather)
+---

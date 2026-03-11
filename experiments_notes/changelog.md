@@ -529,3 +529,512 @@ The `ours` strategy was used deliberately:
 | `user_id` | Never (booking_agent had to call tool to get it) | **Always** — injected via `{user_id?}` |
 | `pending_intents` | Only from conversation history | **Always** — injected via `{pending_intents?}` |
 | `current_intent` | Only from conversation history | **Always** — injected via `{current_intent?}` |
+
+---
+
+## 2026-03-11 — Full Refactor: Centralized State, Multi-Intent, Instruction Alignment
+
+### Overview
+
+Four changes implemented in one session:
+1. Centralized all tools and callbacks into `tools/state/state_tools.py`
+2. Revised state management to follow ADK patterns correctly
+3. Implemented multi-intent handler
+4. Updated all agent instructions to use `{key?}` SESSION CONTEXT injection
+
+---
+
+### CHANGE 1 — Centralized State Manager (`tools/state/`)
+
+#### What changed
+
+Created two new files:
+- `tools/state/keys.py` — registry of all state key name constants
+- `tools/state/state_tools.py` — all 11 tools + all 3 callbacks in one file
+
+Converted old files to thin re-export shims (keep old imports working, zero breakage):
+- `tools/policy_tools/policy_tools.py`
+- `tools/mcp_escalation/escalation_tools.py`
+- `agents/callback.py`
+
+#### Why
+
+State was being mutated in 4 different files with no single source of truth:
+- `tools/policy_tools/policy_tools.py` — frustration, violation, language tools
+- `tools/mcp_escalation/escalation_tools.py` — escalation tools
+- `agents/callback.py` — callbacks
+- `agents/agent.py` — INITIAL_STATE
+
+Key names were raw string literals (`"frustration_count"`, `"escalation_recommended"`)
+scattered across all these files. A single typo would silently create a new key instead
+of raising an error. There was no way to know the full list of state keys without grepping
+6 files manually.
+
+#### Code: `keys.py` — the constant registry
+
+```python
+# tools/state/keys.py
+# Import from here everywhere. Typo = AttributeError immediately.
+
+FRUSTRATION_COUNT         = "frustration_count"
+VIOLATION_COUNT           = "violation_count"
+UNRECOGNIZED_INTENT_COUNT = "unrecognized_intent_count"
+ESCALATION_RECOMMENDED    = "escalation_recommended"
+ESCALATED_TO_HUMAN        = "escalated_to_human"
+LANGUAGE                  = "language"
+USER_ID                   = "user_id"
+AUTHENTICATION            = "authentication"
+PENDING_INTENTS           = "pending_intents"
+CURRENT_INTENT            = "current_intent"
+LAST_ESCALATION_TICKET    = "last_escalation_ticket"
+ESCALATION_HISTORY        = "escalation_history"
+CONVERSATION_SUMMARY      = "conversation_summary"
+TEMP_TURN_SIGNAL          = "temp:turn_signal"
+```
+
+#### Code: `state_tools.py` — file structure
+
+```python
+# tools/state/state_tools.py
+# Section 1  — FRUSTRATION      : _track_frustration
+# Section 2  — VIOLATION        : _flag_violation, _report_violation_to_root, _record_unrecognized_intent
+# Section 3  — LANGUAGE         : _detect_language
+# Section 4  — ESCALATION       : _escalate_to_live_agent, _return_to_bot, _request_callback
+# Section 5  — MULTI-INTENT     : _set_pending_intents, _advance_intent
+# Section 6  — CONVERSATION     : _update_summary
+# Section 7  — CALLBACKS        : count_unrecognized_intents, reset_unrecognized_intent,
+#                                  clear_intent_queue_on_completion
+# Section 8  — FunctionTool reg : all tools wrapped with FunctionTool(func=_fn) at bottom
+
+from .keys import FRUSTRATION_COUNT, ESCALATION_RECOMMENDED, ...
+```
+
+#### Code: re-export shim pattern
+
+```python
+# tools/policy_tools/policy_tools.py  (same for mcp_escalation, callback.py)
+from tools.state.state_tools import (
+    track_frustration,
+    flag_violation,
+    set_pending_intents,
+    advance_intent,
+    ...
+)
+# Any file that already imports from here keeps working — zero import breakage
+```
+
+#### Reasoning
+
+Functions are prefixed `_fn` (e.g. `_track_frustration`) to keep the raw function
+private. At the bottom of the file, `FunctionTool(func=_track_frustration)` is
+assigned to the public name `track_frustration`. This means:
+- The `FunctionTool` object is what gets imported and passed to `Agent(tools=[...])`
+- The raw function cannot be accidentally passed directly as a tool
+- Import consumers always get the correct wrapped version
+
+---
+
+### CHANGE 2 — State Management Revised to Follow ADK Patterns
+
+#### a) `temp:` prefix replaces manual reset callback
+
+```python
+# BEFORE — regular session key, persists across turns, needed manual cleanup
+tool_context.state["turn_detection"] = "frustration"
+# reset_turn_detection callback existed solely to clear this after every turn
+
+# AFTER — ADK auto-deletes temp: keys after each turn (invocation scope)
+tool_context.state["temp:turn_signal"] = "frustration"
+# reset_turn_detection callback deleted entirely
+```
+
+**Reasoning:** ADK has 4 state scopes. The `temp:` prefix means invocation scope —
+the key lives only for the current turn and is automatically removed by ADK after the
+turn completes. Using the wrong scope (session scope for a turn-level signal) required
+a cleanup callback that was pure boilerplate. Using `temp:` removes the need for it.
+
+ADK State Scopes:
+| Prefix | Scope | Lifetime |
+|---|---|---|
+| *(none)* | Session | Whole session |
+| `temp:` | Invocation | Current turn only — auto-deleted |
+| `user:` | User | Across sessions for same user |
+| `app:` | App | All users, all sessions |
+
+#### b) Unified `escalated_to_human` key
+
+```python
+# BEFORE — two different keys, same concept, neither reliably read
+INITIAL_STATE = {"escalate_to_human": None}    # verb, past undefined
+state["escalated_to_human"] = True             # past tense, different name
+
+# AFTER — one key, one spelling, correct boolean default
+INITIAL_STATE = {"escalated_to_human": False}
+# escalate_to_live_agent writes: state["escalated_to_human"] = True
+# return_to_bot writes:          state["escalated_to_human"] = False
+```
+
+**Reasoning:** Two different string literals for the same concept meant neither key
+was ever consistently read. The `?` optional injection in instructions would render
+the wrong key as empty, making the LLM think the user was never escalated.
+
+#### c) `escalation_recommended` set by ALL 4 trigger paths
+
+```python
+# BEFORE — escalate_to_live_agent forgot to set it
+def escalate_to_live_agent(...):
+    state["escalated_to_human"] = True
+    state["last_escalation_ticket"] = ticket_id
+    # escalation_recommended was NOT set here — bug
+
+# AFTER
+def _escalate_to_live_agent(tool_context, reason, context):
+    state[ESCALATED_TO_HUMAN]     = True
+    state[ESCALATION_RECOMMENDED] = True   # ← added
+    state[LAST_ESCALATION_TICKET] = ticket_id
+    ...
+```
+
+**Reasoning:** Every agent reads `escalation_recommended` from SESSION CONTEXT to decide
+whether to stop routing. If `escalate_to_live_agent` doesn't set it, an escalation ticket
+is created but agents keep routing the user through sub-agents anyway, because they see
+`escalation_recommended=False` in their context.
+
+All 4 paths that set `escalation_recommended=True`:
+1. `track_frustration` — at `frustration_count >= 3`
+2. `flag_violation` — at `violation_count >= 3`
+3. `escalate_to_live_agent` — immediately on call
+4. `count_unrecognized_intents` callback — at `unrecognized_intent_count >= 3`
+
+#### d) `update_summary` fixed — now actually writes state
+
+```python
+# BEFORE — returned a dict but never touched state (was a silent no-op)
+def update_summary(tool_context, summary):
+    return {"updated": True, "summary": summary}
+
+# AFTER — correctly writes to session state
+def _update_summary(tool_context: ToolContext, summary: str) -> dict:
+    tool_context.state[CONVERSATION_SUMMARY] = summary
+    return {"updated": True, "summary": summary}
+```
+
+**Reasoning:** The LLM was calling this tool believing the summary was being persisted.
+It was not. The returned dict was discarded. Tools must use `tool_context.state[key] = value`
+to actually write to session state — returning a value from a tool only sends it back
+to the LLM as the tool result, it does not affect state.
+
+#### e) Clean `INITIAL_STATE`
+
+```python
+INITIAL_STATE = {
+    "user_id":                   USER_ID,     # kept
+    "language":                  "english",   # kept
+    "authentication":            False,        # kept
+
+    "frustration_count":         0,            # kept
+    "violation_count":           0,            # kept — was missing before
+    "unrecognized_intent_count": 0,            # kept
+
+    "escalation_recommended":    False,        # kept
+    "escalated_to_human":        False,        # RENAMED from escalate_to_human
+    "last_escalation_ticket":    None,         # ADDED — tool wrote it, never initialised
+    "escalation_history":        [],           # ADDED — tool wrote it, never initialised
+
+    "pending_intents":           [],           # kept
+    "current_intent":            None,         # kept
+
+    "conversation_summary":      "",           # ADDED — update_summary now writes here
+    # REMOVED: "frustration_threshold": 3     — hardcoded constant in tool, not state
+    # REMOVED: "escalate_to_human": None      — renamed to escalated_to_human
+}
+```
+
+**Reasoning:** Every key any tool or callback writes must be declared in INITIAL_STATE
+with a correct type and default. Undeclared keys work at runtime (dict accepts any key)
+but cause three problems: (1) `{key?}` injection renders empty instead of the default,
+(2) state inspection shows confusing missing keys on the first turn, (3) some ADK
+session backends (e.g. DatabaseSessionService) may behave differently on first write
+vs. update of a key.
+
+---
+
+### CHANGE 3 — Multi-Intent Handler
+
+#### What changed
+
+Added to `tools/state/state_tools.py`:
+- `_set_pending_intents` → `FunctionTool` as `set_pending_intents`
+- `_advance_intent` → `FunctionTool` as `advance_intent`
+- `clear_intent_queue_on_completion` callback (safety net)
+
+Both tools added to `root_agent` tools list in `agents/agent.py`.
+Both added to `_DISALLOWED_RESET_TOOLS` in `count_unrecognized_intents` callback.
+`clear_intent_queue_on_completion` wired as `after_agent_callback` on root_agent.
+
+#### Why
+
+When a user sends one message with 2+ distinct intents (e.g. "what does my policy
+cover AND book me an appointment"), root_agent routed to the first sub-agent and
+silently dropped the second intent. No mechanism existed to queue multiple intents
+and process them sequentially.
+
+#### Code: `set_pending_intents`
+
+```python
+def _set_pending_intents(tool_context: ToolContext, intents: list) -> dict:
+    """
+    Call at START of turn when user message has 2+ distinct intents.
+    Valid labels: "policy_query", "booking", "vas_query", "escalation", "greeting"
+    Order by urgency: safety > policy > booking > vas > greeting
+    """
+    tool_context.state[PENDING_INTENTS] = intents
+    tool_context.state[CURRENT_INTENT]  = intents[0] if intents else None
+    return {
+        "status":          "saved",
+        "current_intent":  tool_context.state[CURRENT_INTENT],
+        "pending_intents": intents,
+    }
+```
+
+**Reasoning:** Stores the full list and immediately sets `current_intent` to the first
+item. Root agent reads `current_intent` from SESSION CONTEXT (already injected) to
+know what to route next — it doesn't need to inspect `pending_intents` directly.
+
+#### Code: `advance_intent`
+
+```python
+def _advance_intent(tool_context: ToolContext) -> dict:
+    """
+    Call after sub-agent returns. Pops completed intent, promotes next one.
+    done=True means queue is empty — give consolidated closing response.
+    """
+    pending = list(tool_context.state.get(PENDING_INTENTS, []))
+    if pending:
+        pending.pop(0)                         # remove head (completed intent)
+    next_intent = pending[0] if pending else None
+    tool_context.state[PENDING_INTENTS] = pending
+    tool_context.state[CURRENT_INTENT]  = next_intent
+    return {
+        "next_intent": next_intent,
+        "remaining":   len(pending),
+        "done":        next_intent is None,    # signal to root: queue empty
+    }
+```
+
+**Reasoning:** `pop(0)` removes the front of the list. This is a FIFO queue — intents
+are processed in the order they were declared (urgency order). The `done=True` flag is
+the explicit signal to root_agent to stop routing and give the user a final combined
+response instead of routing to another sub-agent.
+
+#### Code: callback guard
+
+```python
+_DISALLOWED_RESET_TOOLS = {
+    "record_unrecognized_intent",
+    "response_tone_guideline",
+    "detect_language",
+    "flag_violation",
+    "report_violation_to_root",
+    "set_pending_intents",    # routing helper — NOT a genuine success signal
+    "advance_intent",         # routing helper — NOT a genuine success signal
+}
+```
+
+**Reasoning:** `count_unrecognized_intents` callback resets `unrecognized_intent_count`
+to 0 whenever it sees a "real" tool call (genuine success signal). Without this guard,
+calling `set_pending_intents` or `advance_intent` would look like success and reset the
+counter even though nothing was actually resolved for the user.
+
+#### Code: safety net callback
+
+```python
+def clear_intent_queue_on_completion(callback_context: CallbackContext) -> None:
+    """after_agent_callback on root_agent only."""
+    state = callback_context.state
+    if state.get(PENDING_INTENTS):         # non-empty = LLM forgot to advance
+        state[PENDING_INTENTS] = []
+        state[CURRENT_INTENT]  = None
+```
+
+**Reasoning:** LLMs occasionally forget to call `advance_intent` after a sub-agent
+returns, leaving stale intents in the queue. Without this callback, the stale entries
+would persist into the next user turn, causing root_agent to route to the wrong
+sub-agent based on an old `current_intent`. `after_agent_callback` fires after
+root_agent finishes each turn — the cleanup is invisible to the user.
+
+#### Execution flow
+
+```
+User: "What does my policy cover AND book me a cardiologist appointment?"
+
+root_agent Step 5 — detects 2 intents:
+  set_pending_intents(["policy_query", "booking"])
+  state: pending=["policy_query","booking"], current="policy_query"
+
+root_agent Step 6 — routes:
+  current_intent="policy_query" → transfer to rag_agent
+
+rag_agent answers → returns to root_agent
+
+root_agent Step 7 — advances queue:
+  advance_intent()
+  state: pending=["booking"], current="booking", done=False
+
+root_agent Step 6 — routes:
+  current_intent="booking" → transfer to booking_agent
+
+booking_agent books → returns to root_agent
+
+root_agent Step 7 — advances queue:
+  advance_intent()
+  state: pending=[], current=None, done=True
+
+root_agent: done=True → consolidated closing response
+
+after_agent_callback (clear_intent_queue_on_completion):
+  pending=[] already — nothing to clean up
+```
+
+---
+
+### CHANGE 4 — Instruction Alignment with `{key?}` SESSION CONTEXT
+
+#### What changed
+
+Created `prompts/fragments/shared_session_context.md` — a shared fragment injected
+into all 6 agent templates via `{{SHARED_SESSION_CONTEXT}}`.
+
+Rewrote Step 1 of every agent from "check state" (non-functional) to "read SESSION
+CONTEXT" (functional). Rewrote `policy_mcp_agent` authentication gate.
+
+#### Why
+
+ADK substitutes `{key?}` in instruction strings with `session.state["key"]` BEFORE
+sending to the LLM, once per turn. Previously all agent instructions told the LLM to
+"check if authentication is True" or "check escalation_recommended" — but the LLM had
+no mechanism to read those values. It was guessing from conversation history.
+
+With `{key?}` injection, real values appear in the system prompt as plain text.
+The LLM reads "Authenticated | False" in a table and acts on it reliably.
+
+#### Code: the fragment
+
+```markdown
+<!-- prompts/fragments/shared_session_context.md -->
+## SESSION CONTEXT
+> Live state values injected by ADK at the start of every turn.
+
+| Key | Value |
+|-----|-------|
+| Language | {language?} |
+| User ID | {user_id?} |
+| Authenticated | {authentication?} |
+| Frustration count | {frustration_count?} |
+| Violation count | {violation_count?} |
+| Escalation recommended | {escalation_recommended?} |
+| Escalated to human | {escalated_to_human?} |
+| Pending intents | {pending_intents?} |
+| Current intent | {current_intent?} |
+```
+
+**Why `?` on every key:** `{key}` (no `?`) throws an ADK error if the key is absent
+from state. `{key?}` renders as empty string if missing — safe default. Since
+INITIAL_STATE now declares every key, the `?` is technically redundant for known keys,
+but it is kept as a safety net for any future key additions that might not be in
+INITIAL_STATE yet.
+
+#### How the two-pass system works
+
+```
+Pass 1 — PromptManager at import time (static composition):
+  Template: "{{IDENTITY}}\n{{SHARED_SESSION_CONTEXT}}\n..."
+  PromptManager replaces {{TOKEN}} with the .md file content
+  Result: full static instruction string with {key?} placeholders intact
+
+Pass 2 — ADK at each turn (runtime injection):
+  ADK sees: "Authenticated | {authentication?}"
+  ADK looks up session.state["authentication"] → False
+  ADK injects: "Authenticated | False"
+  LLM receives the complete prompt with real values
+```
+
+PromptManager only touches `{{DOUBLE_BRACE}}` tokens.
+ADK only touches `{single_brace?}` tokens.
+They never interfere with each other.
+
+#### Code: policy_mcp_agent authentication gate — before vs after
+
+```markdown
+// BEFORE — LLM told to check a value it cannot see
+## AUTHENTICATION GATE
+Check the session state:
+- If authentication is False OR authentication_required is True:
+  → block user
+
+// AFTER — value is visible in SESSION CONTEXT table above
+## AUTHENTICATION GATE — MUST run before any tool call
+Check authentication in SESSION CONTEXT above.
+- If authentication is False or empty:
+  1. Do NOT call any policy tools.
+  2. Tell the user: "To view your policy details, please verify your identity first."
+  3. transfer_to_agent("root_agent") immediately.
+- Only proceed if authentication is True.
+```
+
+**Reasoning:** The old gate used `authentication_required` (a different key that was
+set by a callback, not by INITIAL_STATE). The new gate uses `authentication` directly
+from the injected SESSION CONTEXT table — the value the LLM can see is the exact value
+from state, no intermediate key needed.
+
+#### Agents updated
+
+| Agent | SESSION CONTEXT added | Key behaviour change |
+|---|---|---|
+| `root_agent` | ✓ | Step 1 checks escalation_recommended, escalated_to_human, violation_count before routing |
+| `booking_agent` | ✓ | Step 1 checks escalation; Step 4 auth gate reads from context |
+| `rag_agent` | ✓ | Step 1 checks escalation |
+| `escalation_agent` | ✓ | Step 1 reads frustration_count so it doesn't ask user to repeat |
+| `policy_mcp_agent` | ✓ | Auth gate now reads live authentication value |
+| `evaluation_agent` | ✓ | Context added (minimal — no routing logic change) |
+
+---
+
+### Final State Ownership Map
+
+| Key | Written by | When | Injected into |
+|---|---|---|---|
+| `language` | `detect_language` | Language detected | All agents |
+| `authentication` | `INITIAL_STATE` / external | Session start / auth flow | All agents |
+| `user_id` | `INITIAL_STATE` | Session start | `booking_agent`, `policy_mcp_agent` |
+| `frustration_count` | `track_frustration` | Frustration signal | All agents |
+| `violation_count` | `flag_violation` | Violation detected | All agents |
+| `unrecognized_intent_count` | `count_unrecognized_intents` callback ONLY | After each model call | Callback only — not injected |
+| `escalation_recommended` | `track_frustration`, `flag_violation`, `escalate_to_live_agent`, `count_unrecognized_intents` | Threshold crossed | All agents |
+| `escalated_to_human` | `escalate_to_live_agent`, `return_to_bot` | Handoff / return | All agents |
+| `pending_intents` | `set_pending_intents`, `advance_intent` | Multi-intent turn | `root_agent` |
+| `current_intent` | `set_pending_intents`, `advance_intent` | Multi-intent routing | `root_agent` |
+| `conversation_summary` | `update_summary` | After resolved request | Optional |
+| `last_escalation_ticket` | `escalate_to_live_agent` | Escalation created | Audit only |
+| `temp:turn_signal` | `track_frustration` | Each frustration signal | Expires — never injected |
+
+---
+
+### Files Changed
+
+| File | Change |
+|---|---|
+| `tools/state/__init__.py` | NEW — package init |
+| `tools/state/keys.py` | NEW — 14 state key constants |
+| `tools/state/state_tools.py` | NEW — all 11 tools + 3 callbacks centralized |
+| `tools/policy_tools/policy_tools.py` | REWRITE — thin re-export shim |
+| `tools/mcp_escalation/escalation_tools.py` | REWRITE — thin re-export shim |
+| `agents/callback.py` | REWRITE — thin re-export shim |
+| `agents/agent.py` | REWRITE — clean INITIAL_STATE, import from state_tools, multi-intent tools, all sub-agents |
+| `prompts/fragments/shared_session_context.md` | NEW — `{key?}` injection fragment |
+| `prompts/templates/root_agent.md` | REWRITE — SESSION CONTEXT + 8-step workflow with multi-intent Steps 5-7 |
+| `prompts/templates/booking_agent.md` | REWRITE — SESSION CONTEXT + auth reads from context |
+| `prompts/templates/rag_agent.md` | REWRITE — SESSION CONTEXT + clean workflow |
+| `prompts/templates/escalation_agent.md` | REWRITE — SESSION CONTEXT + reads frustration_count |
+| `prompts/templates/policy_mcp_agent.md` | REWRITE — SESSION CONTEXT + functional auth gate |
+| `prompts/templates/evaluation_agent.md` | MODIFIED — SESSION CONTEXT added |

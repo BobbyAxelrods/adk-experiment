@@ -1,24 +1,34 @@
-import os
-from google.adk.tools.mcp_tool import MCPToolset
-from google.adk.tools.mcp_tool.mcp_session_manager import StreamableHTTPConnectionParams, StdioServerParameters
+import httpx
+from google.adk.tools.mcp_tool import McpToolset as MCPToolset
+from google.adk.tools.mcp_tool.mcp_session_manager import StreamableHTTPConnectionParams
 
-PATH_TO_MCP_SCRIPT = os.path.join(os.path.dirname(__file__), 'mysql_server.py')
 
-# In a real environment, this would connect to a running MCP server.
-# For demo purposes, we can try to run the script directly via Stdio or connect to a URL.
-# Since we are rebuilding, let's use StdioServerParameters pointing to our local script.
+MAX_TIMEOUT = 30
+
+def custom_mcp_client_factory(headers=None, timeout=None, auth=None):
+    """Factory that creates an HTTPX client with 3 retries."""
+    transport = httpx.AsyncHTTPTransport(retries=3)
+    return httpx.AsyncClient(
+        headers=headers,
+        timeout=timeout,
+        auth=auth,
+        transport=transport,
+        follow_redirects=True
+    )
 
 policy_mcp_tool = MCPToolset(
-    connection_params=StdioServerParameters(
-        command='python',
-        args=[
-            PATH_TO_MCP_SCRIPT
-        ],
+    connection_params=StreamableHTTPConnectionParams(
+        url="https://gc-mcp-mock-1091311790583.asia-southeast1.run.app/policy/",
+        timeout=MAX_TIMEOUT,
+        httpx_client_factory=custom_mcp_client_factory
     ),
-    # If using HTTP:
-    # connection_params=StreamableHTTPConnectionParams(
-    #     url="http://localhost:8080/policy",
-    #     timeout=15
-    # ),
     tool_filter=["get_user_client_id_list", "get_user_policy_and_products"]
+)
+
+booking_mcp_tool = MCPToolset(
+    connection_params=StreamableHTTPConnectionParams(
+        url="https://gc-mcp-mock-1091311790583.asia-southeast1.run.app/booking/",
+        timeout=MAX_TIMEOUT,
+        httpx_client_factory=custom_mcp_client_factory
+    ),
 )
