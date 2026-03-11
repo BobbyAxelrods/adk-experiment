@@ -52,12 +52,7 @@ If the user writes in a language different from the current session language:
 ### Step 5 — Detect multi-intent
 Count the number of distinct actionable intents in the user message.
 
-**Single intent** → skip to Step 6 directly.
-
-**Multiple intents** → call `set_pending_intents(intents=[...])` with the full ordered list BEFORE routing.
-- Valid labels: `"policy_query"`, `"booking"`, `"vas_query"`, `"escalation"`, `"greeting"`
-- Order by urgency: safety > policy > booking > vas > greeting
-- Example: `set_pending_intents(intents=["policy_query", "booking"])`
+{{MULTI_INTENT}}
 
 ### Step 6 — Route
 Check `current_intent` from SESSION CONTEXT (set by `set_pending_intents`), or classify the message directly.
@@ -69,15 +64,11 @@ Check `current_intent` from SESSION CONTEXT (set by `set_pending_intents`), or c
 | VAS / wellness / supplementary | transfer to `vas_agent` |
 | User-specific policy data | transfer to `policy_mcp_agent` |
 | Frustrated / requesting human | call `escalate_to_live_agent(reason, context)` → transfer to `escalation_agent` |
-| Greeting / in-scope small talk | call `response_tone_guideline("foundation", "greeting")` and respond directly |
+| Greeting / in-scope small talk | call `get_tone_guideline(tone_category="system_general")` and respond directly |
 | Out of scope | call `record_unrecognized_intent()` → standard redirect message. **Stop here.** |
 
-### Step 7 — After sub-agent returns, advance the intent queue
-When a sub-agent returns control back to you:
-1. Call `advance_intent()`
-2. Check the result:
-   - `done=False` → route to next agent using `next_intent` (same table as Step 6)
-   - `done=True` → all intents resolved, give a consolidated closing response
+### Step 7 — After sub-agent returns
+Follow the advance-intent steps in the MULTI-INTENT HANDLING section above.
 
 ### Step 8 — Escalation
 After any tool call, if `escalation_recommended=True` in SESSION CONTEXT:
@@ -98,9 +89,11 @@ After any tool call, if `escalation_recommended=True` in SESSION CONTEXT:
 | `set_pending_intents(intents=[...])` | 2+ distinct intents in one message |
 | `advance_intent()` | After each sub-agent returns, pop next intent |
 | `update_summary(summary)` | After resolving a request, save a short summary |
-| `response_tone_guideline(tone_group, reason)` | Before every direct response |
+| `get_tone_guideline(tone_category)` | Before every direct response — pass the matching `ToneCategory` value |
 
 ---
+
+{{TONE_GUIDELINE}}
 
 {{DECISION_RULE}}
 

@@ -2,9 +2,10 @@ import os
 from google.adk.agents import Agent
 from google.adk.tools import AgentTool
 from tools.corpus.corpus_tools import query_corpus, identify_policy_vas_context
-from tools.tone_management.tone_guideline_tools import response_tone_guideline
+from tools.tone_management.tone_guideline_tools_v2 import get_tone_guideline
 from tools.policy_tools.policy_tools import flag_violation, track_frustration, record_unrecognized_intent
 from tools.mcp_escalation.escalation_tools import escalate_to_live_agent
+from tools.state.state_tools import set_pending_intents, advance_intent
 from tools.mcp_policy.mcp_tools import policy_mcp_tool
 from .callback import reset_unrecognized_intent, count_unrecognized_intents
 from agents.policy_mcp_agent import policy_mcp_agent
@@ -23,15 +24,16 @@ rag_agent = Agent(
     description="Factual knowledge agent for Prudential insurance,policy/products and health inquiries",
     instruction=load_instructions("rag_agent_instruction"),
     # Sub-agent tools: allow querying corpus, flag/report violations, increment
-    # frustration, and escalate directly to a human if necessary. Tone selection
-    # should be guided by response_tone_guideline (stateless helper).
+    # frustration, and escalate directly to a human if necessary.
     tools=[
         query_corpus,
         flag_violation,
         escalate_to_live_agent,
         track_frustration,
-        response_tone_guideline,
+        get_tone_guideline,
         record_unrecognized_intent,
+        set_pending_intents,
+        advance_intent,
         AgentTool(policy_mcp_agent),
     ],
     generate_content_config=generate_content_config,

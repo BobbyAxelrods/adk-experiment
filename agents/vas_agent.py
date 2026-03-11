@@ -1,7 +1,7 @@
 import os
 from google.adk.agents import Agent
 from tools.corpus.corpus_tools import query_corpus
-from tools.tone_management.tone_guideline_tools import response_tone_guideline
+from tools.tone_management.tone_guideline_tools_v2 import get_tone_guideline
 from tools.mcp_policy.mcp_tools import policy_mcp_tool
 from utils.agent_config import generate_content_config
 
@@ -19,5 +19,5 @@ vas_agent = Agent(
     description="Factual knowledge agent for Prudential insurance value-added services (vas) inquiries",
     instruction=load_instructions("vas_agent_instruction"),
     generate_content_config=generate_content_config,
-    tools=[query_corpus, response_tone_guideline, policy_mcp_tool],
+    tools=[query_corpus, get_tone_guideline, policy_mcp_tool],
 )

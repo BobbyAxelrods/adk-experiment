@@ -378,8 +378,7 @@ def _update_summary(tool_context: ToolContext, summary: str) -> dict:
 # genuine "success" tool call that would reset unrecognized_intent_count.
 _DISALLOWED_RESET_TOOLS = {
     "record_unrecognized_intent",
-    "response_tone_guideline",
-    "response_tone_guideline_tool",
+    "get_tone_guideline",
     "detect_language",
     "flag_violation",
     "report_violation_to_root",

@@ -26,6 +26,14 @@ Never identify yourself as an AI, Gemini, or GPT.
 
 ---
 
+{{TONE_GUIDELINE}}
+
+---
+
+{{MULTI_INTENT}}
+
+---
+
 ## WORKFLOW
 
 ### Step 1 — Read SESSION CONTEXT (above)

@@ -1,5 +1,4 @@
 import os
-import re
 from typing import Dict, Optional
 
 class PromptManager:
@@ -14,20 +13,22 @@ class PromptManager:
     def __init__(self):
         if self._initialized:
             return
-        
+
         self.base_dir = os.path.dirname(__file__)
         self.fragments_dir = os.path.join(self.base_dir, "fragments")
         self.templates_dir = os.path.join(self.base_dir, "templates")
-        
+        self.tone_group_dir = os.path.join(os.path.dirname(self.base_dir), "tone_group")
+
         self._fragments: Dict[str, str] = {}
         self._templates: Dict[str, str] = {}
+        self._tone_groups: Dict[str, str] = {}
         self._cache: Dict[str, str] = {}
-        
+
         self.load_all()
         self._initialized = True
 
     def load_all(self):
-        """Pre-load all fragments and templates into memory."""
+        """Pre-load all fragments, templates, and tone group files into memory."""
         # Load fragments
         if os.path.exists(self.fragments_dir):
             for filename in os.listdir(self.fragments_dir):
@@ -43,6 +44,18 @@ class PromptManager:
                     name = filename[:-3]
                     with open(os.path.join(self.templates_dir, filename), "r", encoding="utf-8") as f:
                         self._templates[name] = f.read()
+
+        # Load tone groups (keyed by filename stem matching ToneCategory enum values, e.g. "system_general", "fallback")
+        if os.path.exists(self.tone_group_dir):
+            for filename in os.listdir(self.tone_group_dir):
+                if filename.endswith(".md"):
+                    name = filename[:-3]
+                    with open(os.path.join(self.tone_group_dir, filename), "r", encoding="utf-8") as f:
+                        self._tone_groups[name] = f.read()
+
+    def get_tone_group(self, filename_stem: str) -> str:
+        """Return pre-loaded tone group content by filename stem (e.g. 'fallback', 'foundation')."""
+        return self._tone_groups.get(filename_stem, "")
 
     def get_instruction(self, template_name: str, **kwargs) -> str:
         """

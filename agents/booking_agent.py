@@ -3,8 +3,9 @@ import os
 from google.adk.agents import Agent
 from tools.policy_tools.policy_tools import flag_violation, report_violation_to_root, track_frustration, record_unrecognized_intent
 from tools.mcp_escalation.escalation_tools import escalate_to_live_agent
-from tools.tone_management.tone_guideline_tools import response_tone_guideline
+from tools.tone_management.tone_guideline_tools_v2 import get_tone_guideline
 from tools.booking.appointment_booking import create_booking_tools
+from tools.state.state_tools import set_pending_intents, advance_intent
 from tools.mcp_policy.mcp_tools import policy_mcp_tool
 from tools.mcp_policy.mcp_tools import booking_mcp_tool
 from .callback import reset_unrecognized_intent, count_unrecognized_intents
@@ -22,10 +23,12 @@ model = os.getenv("MODEL_NAME", "gemini-2.5-flash")
 tools = create_booking_tools()
 tools.append(AgentTool(policy_mcp_agent))
 
-tools.append(response_tone_guideline)
+tools.append(get_tone_guideline)
 tools.append(track_frustration)
 tools.append(flag_violation)
 tools.append(record_unrecognized_intent)
+tools.append(set_pending_intents)
+tools.append(advance_intent)
 
 booking_agent = Agent(
     model=model,

@@ -33,7 +33,7 @@ from tools.state.state_tools import (
     clear_intent_queue_on_completion, # after_agent_callback (safety net)
 )
 # from tools.intent_handler.multi_intent import set_pending_intents, advance_intent
-from tools.tone_management.tone_guideline_tools import response_tone_guideline
+from tools.tone_management.tone_guideline_tools_v2 import get_tone_guideline
 from utils.agent_config import generate_content_config
 from prompts.manager import prompt_manager
 
@@ -107,7 +107,7 @@ root_agent = Agent(
         set_pending_intents,       # multi-intent: queue all intents
         advance_intent,            # multi-intent: pop next intent
         update_summary,
-        response_tone_guideline,
+        get_tone_guideline,
     ],
     sub_agents=[
         rag_agent,

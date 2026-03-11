@@ -7,7 +7,8 @@ import os
 # Import Agents & Tools
 from tools.mcp_escalation.escalation_tools import escalate_to_live_agent
 from tools.policy_tools.policy_tools import track_frustration
-from tools.tone_management.tone_guideline_tools import response_tone_guideline
+from tools.tone_management.tone_guideline_tools_v2 import get_tone_guideline
+from tools.state.state_tools import set_pending_intents, advance_intent
 from .callback import reset_unrecognized_intent,count_unrecognized_intents
 from utils.agent_config import generate_content_config
 
@@ -26,10 +27,12 @@ escalation_agent = Agent(
     instruction=load_instructions("escalation_agent_instruction"),
     generate_content_config=generate_content_config,
     tools=[
-        track_frustration, 
-        response_tone_guideline,
-        escalate_to_live_agent
-        ],
+        track_frustration,
+        get_tone_guideline,
+        escalate_to_live_agent,
+        set_pending_intents,
+        advance_intent,
+    ],
     after_model_callback=count_unrecognized_intents,
     before_agent_callback=reset_unrecognized_intent
 )
