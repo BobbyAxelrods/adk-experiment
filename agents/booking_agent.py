@@ -7,7 +7,7 @@ from tools.tone_management.tone_guideline_tools_v2 import get_tone_guideline
 from tools.booking.appointment_booking import create_booking_tools
 from tools.state.state_tools import set_pending_intents, advance_intent
 from tools.mcp_policy.mcp_tools import policy_mcp_tool
-from tools.mcp_policy.mcp_tools import booking_mcp_tool
+from .callback import reset_unrecognized_intent, count_unrecognized_intents,_require_authentication_before_booking
 from .callback import reset_unrecognized_intent, count_unrecognized_intents
 from google.adk.tools import AgentTool
 from agents.policy_mcp_agent import policy_mcp_agent
@@ -35,7 +35,7 @@ booking_agent = Agent(
     name='booking_agent',
     description="Worker for booking, appointment and scheduling management",
     instruction=load_instructions("booking_agent_instruction"),
-    tools=tools,
+    before_agent_callback=[_require_authentication_before_booking,reset_unrecognized_intent]
     after_model_callback=count_unrecognized_intents,
     generate_content_config=generate_content_config,
     before_agent_callback=reset_unrecognized_intent

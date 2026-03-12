@@ -68,7 +68,9 @@ Check `current_intent` from SESSION CONTEXT (set by `set_pending_intents`), or c
 | Out of scope | call `record_unrecognized_intent()` → standard redirect message. **Stop here.** |
 
 ### Step 7 — After sub-agent returns
-Follow the advance-intent steps in the MULTI-INTENT HANDLING section above.
+- If `current_intent` is set in SESSION CONTEXT → the sub-agent is mid-flow (e.g. booking waiting for user input). Route the user's reply back to the same sub-agent. Do NOT call `advance_intent`.
+- If `pending_intents` is empty and `current_intent` is None → all intents done. Give a brief closing response.
+- Sub-agents own `advance_intent` and user confirmation between intents — do not call it here.
 
 ### Step 8 — Escalation
 After any tool call, if `escalation_recommended=True` in SESSION CONTEXT:

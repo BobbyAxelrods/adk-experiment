@@ -345,16 +345,21 @@ def _advance_intent(tool_context: ToolContext) -> dict:
 
 def clear_intent_queue_on_completion(callback_context: CallbackContext) -> None:
     """
-    **When to add it:** Only if sandbox testing shows the LLM occasionally skips `advance_intent` and leaves stale state into the next turn. Don't add it preemptively.
-
     after_agent_callback on root_agent only.
-    Safety net: if pending_intents is non-empty when root_agent finishes a turn,
-    the LLM dropped the queue mid-flow. Reset it so the next turn starts clean.
+    Safety net: if the LLM dropped the queue (pending_intents is non-empty but
+    current_intent is None), reset so the next turn starts clean.
+
+    Does NOT clear the queue when current_intent is still set — that means a
+    sub-agent is mid-flow (e.g. booking waiting for user date input) and the
+    remaining intents must survive into the next turn.
     """
     state = callback_context.state
-    if state.get("pending_intents"):
+    pending = state.get("pending_intents", [])
+    current = state.get("current_intent")
+    # Only wipe if there are stale intents but the LLM already lost track
+    # (current_intent is None means the LLM never routed or already called advance_intent to completion)
+    if pending and current is None:
         state["pending_intents"] = []
-        state["current_intent"] = None
 
 # ══════════════════════════════════════════════════════════════════════════════
 # SECTION 6 — CONVERSATION

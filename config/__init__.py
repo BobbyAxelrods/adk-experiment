@@ -1,1 +1,3 @@
-from .config import *
+```
+
+config/config.py

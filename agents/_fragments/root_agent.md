@@ -47,14 +47,7 @@ Call `detect_language(language)` ONCE only.
 - Do NOT call `detect_language` more than once per turn.
 
 ### Step 5 — Detect multi-intent
-Count the number of distinct actionable intents in the user message.
-
-**Single intent** → skip to Step 6 directly.
-
-**Multiple intents** (e.g. "What does my policy cover AND book me an appointment") → call `set_pending_intents(intents=[...])` with the full ordered list before routing anything.
-- Valid labels: `"policy_query"`, `"booking"`, `"escalation"`, `"greeting"`, `"greeting"`, `"greeting"`
-- Order by urgency: safety > policy > booking > greeting
-- Example: `set_pending_intents(intents=["policy_query", "booking"])`
+{{ shared_multi_intent }}
 
 ### Step 6 — Route or respond
 Check `current_intent` in SESSION CONTEXT (set by `set_pending_intents`, or None for single-intent).
@@ -67,12 +60,11 @@ Check `current_intent` in SESSION CONTEXT (set by `set_pending_intents`, or None
 | `"greeting"` or in-scope chat | call `response_tone_guideline("foundation", "greeting")` |
 | out-of-scope (weather, sports, jokes) | call `record_unrecognized_intent()` then give standard redirect. Stop. |
 
-### Step 7 — After sub-agent returns, check remaining intents
+### Step 7 — After sub-agent returns
 When a sub-agent returns control back to you:
-1. Call `advance_intent()` to pop the completed intent
-2. Check the returned `next_intent`:
-   - `done` is False → route to the next agent (same table as Step 6)
-   - `done` is True → all intents handled, give a consolidated closing response
+- If `current_intent` is set in SESSION CONTEXT → the sub-agent is mid-flow. Route the user's reply back to the same sub-agent. Do NOT call `advance_intent`.
+- If `pending_intents` is empty and `current_intent` is None → all intents are done. Give a brief closing response.
+- Do NOT call `advance_intent` here — sub-agents own the queue advancement and user confirmation.
 
 ### Step 8 — Check escalation flag
 After any tool call, if `escalation_recommended` is True in SESSION CONTEXT → transfer to `escalation_agent`.

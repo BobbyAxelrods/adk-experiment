@@ -67,14 +67,8 @@ except ImportError:
             VAS_CORPUS_NAME,
         )
 
-_VERTEX_INITIALIZED = False
-try:
-    use_vertex = os.environ.get("GOOGLE_GENAI_USE_VERTEXAI", "").strip().lower() in {"1", "true", "yes", "y", "on"}
-    if use_vertex and PROJECT_ID and LOCATION:
-        vertexai.init(project=PROJECT_ID, location=LOCATION)
-        _VERTEX_INITIALIZED = True
-except Exception:
-    _VERTEX_INITIALIZED = False
+# initialize vertexai
+vertexai.init(project=PROJECT_ID, location=LOCATION)
 
 def create_corpus(
     display_name: str,

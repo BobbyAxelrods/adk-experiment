@@ -1038,3 +1038,21 @@ from state, no intermediate key needed.
 | `prompts/templates/escalation_agent.md` | REWRITE — SESSION CONTEXT + reads frustration_count |
 | `prompts/templates/policy_mcp_agent.md` | REWRITE — SESSION CONTEXT + functional auth gate |
 | `prompts/templates/evaluation_agent.md` | MODIFIED — SESSION CONTEXT added |
+
+
+Multi Intent Flow 
+The flow now
+
+  User: "Tell me about my policy AND book an appointment"
+    Agent: "I see two things:
+            1. Policy coverage question
+            2. Book an appointment
+            Shall I start with the policy question?"
+    User: "Yes"
+    Agent: set_pending_intents(["policy_query", "booking"])
+           → handles policy query → answers
+    Agent: advance_intent() → "Done! Ready to move on to booking?"
+    User: "Yes"
+    Agent: → booking flow (asks district, date, time...)
+    User: (answers each booking question)
+    Agent: advance_intent() → done=True → closing summary

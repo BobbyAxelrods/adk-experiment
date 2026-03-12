@@ -1,1 +1,3 @@
-__all__ = []
+```
+
+tools/lifecycle/lifecycle_main.py

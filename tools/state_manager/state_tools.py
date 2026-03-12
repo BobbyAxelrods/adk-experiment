@@ -5,7 +5,6 @@ Central State Function
 """
 
 from google.adk.tools import ToolContext, FunctionTool
-from typing import List
 from .keys import * 
 
 # ── FRUSTRATION ──────────────────────────────────────────────────────────────
@@ -55,7 +54,7 @@ def set_tone_group(tool_context: ToolContext, tone_group: str, reason: str) -> d
 
 # ── MULTI-INTENT QUEUE ───────────────────────────────────────────────────────
 
-def set_pending_intents(tool_context: ToolContext, intents: List[str]) -> dict:
+def set_pending_intents(tool_context: ToolContext, intents: list) -> dict:
     # writes: PENDING_INTENTS, CURRENT_INTENT
     ...
 
