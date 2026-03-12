@@ -4,6 +4,7 @@
 # Hide: secrets, PII, caches, venv, IDE, OS files
 # ============================================================
 .claude
+.claude
 # ── Secrets & API Tokens ────────────────────────────────────
 .env
 .env.*
