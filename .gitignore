@@ -3,7 +3,7 @@
 # Keep: agents/, tools/, tone_group/, utils/, config/
 # Hide: secrets, PII, caches, venv, IDE, OS files
 # ============================================================
-
+.claude
 # ── Secrets & API Tokens ────────────────────────────────────
 .env
 .env.*
